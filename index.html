@@ -46,14 +46,84 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
 .rh{display:flex;gap:12px;align-items:center;border-bottom:2px solid #0b5fd9;padding-bottom:10px}.rh img{height:52px;max-width:120px;object-fit:contain}.rh h2{margin:0}
 .blk{break-inside:avoid;border:1px solid #bbb;border-radius:6px;padding:10px;margin:10px 0}.rp .ph img{width:140px;height:105px}
 #printRoot{display:none}
+.app[hidden],#loginScreen[hidden]{display:none}
+#loginScreen{min-height:100vh;box-sizing:border-box;display:grid;place-items:center;padding:32px;background:radial-gradient(ellipse at 15% 15%,rgba(11,95,217,.12),transparent 38%),var(--bg)}
+.login-layout{width:min(100%,1040px);min-height:620px;display:grid;grid-template-columns:minmax(0,1fr) 440px;overflow:hidden;background:var(--card);border:1px solid var(--bd);border-radius:26px;box-shadow:0 28px 80px rgba(20,35,65,.16);animation:login-rise .75s cubic-bezier(.2,.75,.25,1) both}
+.login-showcase{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:42px;color:#fff;background:linear-gradient(145deg,#0b1b36 5%,#123e77 60%,#0b5fd9)}
+.login-showcase:before,.login-showcase:after{content:"";position:absolute;z-index:-1;border:1px solid #ffffff1f;border-radius:50%;animation:orbit 24s linear infinite}
+.login-showcase:before{width:420px;height:420px;right:-145px;top:-115px;box-shadow:0 0 0 36px #ffffff08,0 0 0 72px #ffffff06}
+.login-showcase:after{width:230px;height:230px;left:-115px;bottom:-92px;animation-direction:reverse}
+.login-brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:.01em}
+.login-brand-icon{width:42px;height:42px;display:grid;place-items:center;border:1px solid #ffffff40;border-radius:13px;background:#ffffff18;font-size:21px}
+.login-copy{max-width:440px;animation:login-fade .8s .12s both}
+.login-eyebrow{display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;color:#c9e0ff;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.login-eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:#6ee7b7;box-shadow:0 0 14px #6ee7b7}
+.login-copy h2{max-width:390px;margin:0 0 14px;font-size:clamp(32px,4vw,46px);line-height:1.08;letter-spacing:-.045em}
+.login-copy p{max-width:390px;margin:0;color:#d0def1;font-size:15px;line-height:1.7}
+.login-preview{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:410px;animation:login-fade .8s .3s both}
+.preview-stat{padding:14px 16px;border:1px solid #ffffff26;border-radius:14px;background:#ffffff12;backdrop-filter:blur(8px)}
+.preview-stat span{display:block;color:#c4d5ed;font-size:11px}.preview-stat strong{display:block;margin-top:3px;font-size:20px}
+.login-card{align-self:center;width:100%;box-sizing:border-box;padding:46px 40px;animation:login-fade .7s .18s both}
+.login-mark{width:48px;height:48px;display:grid;place-items:center;margin-bottom:24px;border-radius:15px;background:var(--pri2);color:var(--pri);font-size:23px}
+.login-card h1{font-size:27px;letter-spacing:-.035em;margin:0 0 6px}.login-intro{margin:0 0 25px;color:var(--mut)}
+.login-field{margin-bottom:17px}.login-field label{font-weight:600;color:var(--tx);margin-bottom:6px}
+.login-card input{padding:12px;transition:border-color .2s,box-shadow .2s,background .2s}
+.login-card input:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 4px color-mix(in srgb,var(--pri) 15%,transparent)}
+.login-actions{display:grid;gap:10px;margin-top:21px}
+.login-actions .btn{width:100%;padding:12px;transition:transform .18s,box-shadow .18s,background .18s}
+.login-actions .btn:hover{transform:translateY(-2px);box-shadow:0 7px 16px #0b5fd933}
+.login-actions .btn:active{transform:translateY(0)}
+.login-primary{box-shadow:0 5px 14px #0b5fd933}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--card)!important;color:var(--tx)!important;border:1px solid var(--bd)!important}
+.google-btn svg{width:18px;height:18px}
+.login-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--mut);font-size:12px}
+.login-divider:before,.login-divider:after{content:"";height:1px;flex:1;background:var(--bd)}
+#loginMessage{min-height:22px;margin:15px 0 0;color:var(--mut);font-size:13px}
+#loginMessage[data-error="true"]{color:var(--dan)}
+.login-secure{margin:23px 0 0;padding-top:17px;border-top:1px solid var(--bd);color:var(--mut);font-size:11px;text-align:center}
+@keyframes login-rise{from{opacity:0;transform:translateY(16px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes login-fade{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes orbit{to{transform:rotate(360deg)}}
 @media print{body.printing>*:not(#printRoot){display:none!important}body.printing #printRoot{display:block}.rp{padding:0}}
 @media (max-width:760px){.app{flex-direction:column}
 .side{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:auto;z-index:20;padding-bottom:env(safe-area-inset-bottom,0px)}
 .brand{display:none}.nav{display:flex}.nav button{flex-direction:column;align-items:center;font-size:11px;padding:8px 2px;gap:1px;text-align:center}
-.main{padding:16px 14px 96px}.f2{grid-template-columns:1fr}.kv{grid-template-columns:1fr}}
+.main{padding:16px 14px 96px}.f2{grid-template-columns:1fr}.kv{grid-template-columns:1fr}
+#loginScreen{padding:16px;align-items:start}.login-layout{max-width:480px;min-height:0;grid-template-columns:1fr;border-radius:22px}
+.login-showcase{min-height:235px;padding:25px 27px 23px}.login-brand-icon{width:36px;height:36px}.login-copy{margin:24px 0 17px}.login-copy h2{font-size:29px;margin-bottom:8px}.login-copy p{font-size:13px}
+.login-preview{max-width:none}.preview-stat{padding:9px 12px}.preview-stat strong{font-size:17px}
+.login-card{padding:28px 27px 25px}.login-mark{display:none}.login-card h1{font-size:24px}.login-intro{margin-bottom:20px}}
+@media (max-width:380px){.login-showcase{padding:22px}.login-card{padding:25px 21px}.login-copy h2{font-size:26px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style></head>
 <body>
-<div class="app">
+<section id="loginScreen" aria-labelledby="loginTitle">
+ <div class="login-layout">
+  <div class="login-showcase">
+   <div class="login-brand"><span class="login-brand-icon" aria-hidden="true">✦</span><span>Gestión de instalaciones</span></div>
+   <div class="login-copy"><span class="login-eyebrow">Tu trabajo, en orden</span><h2>Cada instalación cuenta.</h2><p>Clientes, equipos y mantenimientos reunidos en un solo lugar. Entra y sigue construyendo un servicio excepcional.</p></div>
+   <div class="login-preview" aria-label="Resumen de la aplicación"><div class="preview-stat"><span>Todo conectado</span><strong>Clientes</strong></div><div class="preview-stat"><span>Siempre al día</span><strong>Servicios</strong></div></div>
+  </div>
+  <div class="login-card">
+   <div class="login-mark" aria-hidden="true">🛠</div>
+   <h1 id="loginTitle">Qué bueno verte</h1>
+   <p class="login-intro">Inicia sesión y volvamos al trabajo.</p>
+   <form onsubmit="event.preventDefault();sbLogin()">
+    <div class="login-field"><label for="loginEmail">Correo electrónico</label><input id="loginEmail" name="email" type="email" autocomplete="username" placeholder="tu@empresa.com" required></div>
+    <div class="login-field"><label for="loginPass">Contraseña</label><input id="loginPass" name="password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required></div>
+    <div class="login-actions">
+     <button class="btn login-primary" type="submit">Iniciar sesión</button>
+     <button class="btn g" type="button" onclick="sbRegister()">Crear cuenta con correo</button>
+     <div class="login-divider">o continúa con</div>
+     <button class="btn google-btn" type="button" onclick="sbGoogleLogin()"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.42 37.98 46.98 31.88 46.98 24.55z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.55 2.56 10.78z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.15 1.45-4.92 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continuar con Google</button>
+    </div>
+   </form>
+   <p id="loginMessage" role="status" aria-live="polite">Verificando conexión…</p>
+   <p class="login-secure">🔒 Acceso seguro. Tus datos se sincronizan con tu cuenta.</p>
+  </div>
+ </div>
+</section>
+<div class="app" id="appShell" hidden>
  <aside class="side"><div class="brand" id="brand"></div><nav class="nav" id="nav"></nav></aside>
  <main class="main" id="main"></main>
 </div>
@@ -71,7 +141,7 @@ let S={clients:[],inst:[],maint:[],cfg:{name:'Mi Empresa',logo:'',tech:'',phone:
 const idb=()=>new Promise((ok,no)=>{const r=indexedDB.open('gestor-inst',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
 async function kvGet(k){try{const db=await idb();return await new Promise(r=>{const q=db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r()})}catch(e){}}
 async function kvSet(k,v){try{const db=await idb();db.transaction('kv','readwrite').objectStore('kv').put(v,k)}catch(e){toast('No se pudo guardar en este navegador')}}
-window.S=S;window.kvSet=kvSet;window.brand=brand;window.go=go;const save=()=>{kvSet('clients',S.clients);kvSet('inst',S.inst);kvSet('maint',S.maint);kvSet('cfg',S.cfg);if(window.firebaseSync)window.firebaseSync();};
+window.S=S;window.kvSet=kvSet;window.brand=brand;window.go=go;const save=()=>{kvSet('clients',S.clients);kvSet('inst',S.inst);kvSet('maint',S.maint);kvSet('cfg',S.cfg);if(window.cloudSync)window.cloudSync();};
 function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2400)}
 function img(f,max=1000,type='image/jpeg'){return new Promise(ok=>{const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);ok(c.toDataURL(type,.72))};i.src=r.result};r.readAsDataURL(f)})}
 const modal=(h)=>{const m=$('#modal');m.innerHTML='<div class="mb">'+h+'</div>';m.style.display='flex';m.scrollTop=0};
@@ -222,64 +292,94 @@ window.onafterprint=()=>document.body.classList.remove('printing');
 /* Configuración */
 function Vcfg(){const c=S.cfg,t=(k,l)=>`<div><label>${l}</label><input id="f_${k}" value="${esc(c[k])}"></div>`;
  main.innerHTML=`<h1>Configuración</h1>
- <div class="card" style="margin-bottom:14px"><h2 style="margin-top:0">☁️ Cuenta y sincronización Firebase</h2>
- <p id="fbState" class="mut">Inicializando conexión…</p>
- <div class="f2"><div><label>Correo electrónico</label><input id="fbEmail" type="email" autocomplete="username" placeholder="tu@empresa.com"></div><div><label>Contraseña</label><input id="fbPass" type="password" autocomplete="current-password" placeholder="Mínimo 6 caracteres"></div></div>
- <div class="acts"><button class="btn" onclick="fbRegister()">Crear cuenta</button><button class="btn g" onclick="fbLogin()">Iniciar sesión</button><button class="btn g" onclick="fbLogout()">Cerrar sesión</button><button class="btn d" onclick="fbSyncNow()">Sincronizar ahora</button></div>
- <p class="mut" style="font-size:12px">Los registros se sincronizan por cuenta. Para activar el acceso seguro, publica las reglas de Firebase incluidas con la aplicación. No compartas tu contraseña.</p></div>
+ <div class="card" style="margin-bottom:14px"><h2 style="margin-top:0">☁️ Cuenta y sincronización Supabase</h2>
+ <p id="cloudState" class="mut">Conectando con Supabase…</p>
+ <div class="acts"><button class="btn g" onclick="sbLogout()">Cerrar sesión</button><button class="btn d" onclick="cloudSyncNow()">Sincronizar ahora</button></div>
+ <p class="mut" style="font-size:12px">Tus registros y archivos se sincronizan de forma privada con tu cuenta de Supabase. Las tablas, políticas de acceso y almacenamiento se configuran con el archivo <code>supabase-schema.sql</code>.</p></div>
  <div class="card"><div class="f2">${t('name','Nombre de la empresa')}${t('tech','Técnico que atiende (por defecto)')}${t('phone','Teléfono')}${t('addr','Dirección')}</div>
  <div class="f1"><label>Técnicos disponibles (uno por línea)</label><textarea id="f_techs">${esc(c.techs)}</textarea></div>
  <div class="f2"><div><label>Logotipo</label><input type="file" accept="image/*" onchange="setLogo(this)">${c.logo?`<div class="ph"><div><img src="${c.logo}" alt=""><b onclick="S.cfg.logo='';save();brand();Vcfg()">×</b></div></div>`:''}</div>
  <div><label>Apariencia</label><select id="f_theme">${[['auto','Automática'],['light','Clara'],['dark','Oscura']].map(o=>`<option value="${o[0]}" ${c.theme===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div></div>
  <div class="acts"><button class="btn" onclick="saveCfg()">Guardar configuración</button></div></div>
- <p class="mut">Los datos también se conservan localmente en este navegador. Con una sesión iniciada, clientes, instalaciones, mantenimientos y configuración se sincronizan con Firebase.</p>`;if(window.firebaseRefreshStatus)window.firebaseRefreshStatus();}
+ <p class="mut">Los datos también se conservan localmente en este navegador. Con una sesión iniciada, clientes, instalaciones, mantenimientos, configuración y fotos se sincronizan con Supabase.</p>`;if(window.cloudRefreshStatus)window.cloudRefreshStatus();}
 async function setLogo(i){S.cfg.logo=await img(i.files[0],300,'image/png');save();brand();Vcfg()}
 function saveCfg(){Object.assign(S.cfg,{name:g('name')||'Mi Empresa',tech:g('tech'),phone:g('phone'),addr:g('addr'),techs:$('#f_techs').value,theme:g('theme')});save();brand();toast('Configuración guardada')}
-window.localReady=(async()=>{const[c,i,m,f]=await Promise.all([kvGet('clients'),kvGet('inst'),kvGet('maint'),kvGet('cfg')]);if(c)S.clients=c;if(i)S.inst=i;if(m)S.maint=m;if(f)Object.assign(S.cfg,f);brand();go('dash')})();
+window.localReady=(async()=>{const[c,i,m,f]=await Promise.all([kvGet('clients'),kvGet('inst'),kvGet('maint'),kvGet('cfg')]);if(c)S.clients=c;if(i)S.inst=i;if(m)S.maint=m;if(f)Object.assign(S.cfg,f);brand()})();
 </script>
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const firebaseConfig = {
- apiKey: "AIzaSyBeKavL60ijrFjfSUAtCQZeaa4eJKe1hlM",
- authDomain: "electronnicaragua-6b4fc.firebaseapp.com",
- projectId: "electronnicaragua-6b4fc",
- storageBucket: "electronnicaragua-6b4fc.firebasestorage.app",
- messagingSenderId: "278242117137",
- appId: "1:278242117137:web:8935e05f8c6066d59053b0",
- measurementId: "G-EHYZM76YZD"
-};
-const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getFirestore(app), storage=getStorage(app);
-let currentUser=null, busy=false, queued=false, loadingRemote=false;
-const status=(msg)=>{const e=document.querySelector('#fbState');if(e)e.textContent=msg;};
-window.firebaseRefreshStatus=()=>status(currentUser?`Sesión iniciada: ${currentUser.email}. Sincronización en la nube disponible.`:'No has iniciado sesión. Los cambios se guardan solo en este dispositivo hasta iniciar sesión.');
+const SUPABASE_URL="https://lcsmaedskoryhnuwqfvk.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_zsf9J37i-yLO6hCoZy_UGg_JNM2b4Iw";
+const STORAGE_BUCKET="gestor-inst-media", STORAGE_PREFIX="sb-storage:";
+const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let currentUser=null, busy=false, queued=false, loadingRemote=false, loadedUserId='', loadingUserId='', authLoadSequence=0;
+const signedAssetPaths=new Map();
+const status=(msg)=>{const e=document.querySelector('#cloudState');if(e)e.textContent=msg;const login=document.querySelector('#loginMessage');if(login){login.textContent=msg;login.dataset.error=/error|incorrect|inválido|activa|cerró|bloqueó|autorizado|configura|no se pudo/i.test(msg);}};
+function showLogin(){document.querySelector('#appShell').hidden=true;document.querySelector('#loginScreen').hidden=false;}
+function showApp(){document.querySelector('#loginScreen').hidden=true;document.querySelector('#appShell').hidden=false;}
+window.cloudRefreshStatus=()=>status(currentUser?`Sesión iniciada: ${currentUser.email}. Sincronización con Supabase activa.`:'No has iniciado sesión.');
 function safeId(id){return String(id).replace(/[^a-zA-Z0-9_-]/g,'_')||'record';}
-async function cloudImage(data, path){
- if(typeof data!=='string'||!data.startsWith('data:'))return data||'';
- const r=ref(storage,`users/${currentUser.uid}/media/${path}`);
- await uploadString(r,data,'data_url');
- return await getDownloadURL(r);
+function failIfError(result){if(result.error)throw result.error;return result.data;}
+function storedAsset(path){return STORAGE_PREFIX+path;}
+async function packAsset(value,path){
+ if(typeof value!=='string'||!value)return value||'';
+ if(value.startsWith(STORAGE_PREFIX))return value;
+ const knownPath=signedAssetPaths.get(value);
+ if(knownPath)return storedAsset(knownPath);
+ if(!value.startsWith('data:'))return value;
+ if(!currentUser)throw new Error('Inicia sesión para subir archivos a Supabase.');
+ const blob=await fetch(value).then(response=>response.blob());
+ const result=await supabase.storage.from(STORAGE_BUCKET).upload(path,blob,{upsert:true,contentType:blob.type||'application/octet-stream'});
+ failIfError(result);
+ return storedAsset(path);
 }
-async function cloudRecord(kind, item){
+async function unpackAsset(value){
+ if(typeof value!=='string'||!value.startsWith(STORAGE_PREFIX))return value||'';
+ const path=value.slice(STORAGE_PREFIX.length);
+ const result=await supabase.storage.from(STORAGE_BUCKET).createSignedUrl(path,3600);
+ const signedUrl=failIfError(result).signedUrl;
+ signedAssetPaths.set(signedUrl,path);
+ return signedUrl;
+}
+async function packRecord(kind,item){
  const out={...item};
  if(kind==='inst'){
-  if(Array.isArray(out.photos))out.photos=await Promise.all(out.photos.map((p,i)=>cloudImage(p,`inst_${safeId(item.id)}_photo_${i}`)));
-  if(out.qr)out.qr=await cloudImage(out.qr,`inst_${safeId(item.id)}_qr`);
+  if(Array.isArray(out.photos))out.photos=await Promise.all(out.photos.map((p,i)=>packAsset(p,`${currentUser.id}/inst/${safeId(item.id)}/photo_${i}.jpg`)));
+  if(out.qr)out.qr=await packAsset(out.qr,`${currentUser.id}/inst/${safeId(item.id)}/qr.jpg`);
  }
- if(kind==='cfg'&&out.logo)out.logo=await cloudImage(out.logo,'company_logo');
+ if(kind==='cfg'&&out.logo)out.logo=await packAsset(out.logo,`${currentUser.id}/cfg/company_logo.png`);
  return out;
 }
-async function readCollection(kind){const snap=await getDocs(collection(db,'users',currentUser.uid,kind));return snap.docs.map(d=>({id:d.id,...d.data()}));}
-async function writeCollection(kind, items){
- const existing=await getDocs(collection(db,'users',currentUser.uid,kind));
- const ids=new Set(items.map(x=>String(x.id)));
- for(const d of existing.docs)if(!ids.has(d.id))await deleteDoc(d.ref);
- for(const item of items){const payload=await cloudRecord(kind,item);Object.assign(item,payload);await setDoc(doc(db,'users',currentUser.uid,kind,String(item.id)),payload);}
+async function unpackRecord(kind,item){
+ const out={...item};
+ if(kind==='inst'){
+  if(Array.isArray(out.photos))out.photos=await Promise.all(out.photos.map(unpackAsset));
+  if(out.qr)out.qr=await unpackAsset(out.qr);
+ }
+ if(kind==='cfg'&&out.logo)out.logo=await unpackAsset(out.logo);
+ return out;
 }
-async function writeConfig(){const payload=await cloudRecord('cfg',{id:'main',...window.S.cfg});Object.assign(window.S.cfg,payload);await setDoc(doc(db,'users',currentUser.uid,'cfg','main'),payload);}
+async function readCollection(kind){
+ const rows=failIfError(await supabase.from('app_records').select('id,data').eq('user_id',currentUser.id).eq('collection',kind));
+ return Promise.all(rows.map(row=>unpackRecord(kind,{...row.data,id:row.id})));
+}
+async function writeCollection(kind,items){
+ const existing=failIfError(await supabase.from('app_records').select('id').eq('user_id',currentUser.id).eq('collection',kind));
+ const ids=new Set(items.map(item=>String(item.id)));
+ for(const row of existing)if(!ids.has(row.id))failIfError(await supabase.from('app_records').delete().eq('user_id',currentUser.id).eq('collection',kind).eq('id',row.id));
+ if(!items.length)return;
+ const rows=await Promise.all(items.map(async item=>({user_id:currentUser.id,collection:kind,id:String(item.id),data:await packRecord(kind,item),updated_at:new Date().toISOString()})));
+ failIfError(await supabase.from('app_records').upsert(rows,{onConflict:'user_id,collection,id'}));
+}
+async function readConfig(){
+ const rows=failIfError(await supabase.from('app_records').select('id,data').eq('user_id',currentUser.id).eq('collection','cfg').eq('id','main').limit(1));
+ return rows.length?unpackRecord('cfg',{...rows[0].data,id:rows[0].id}):null;
+}
+async function writeConfig(){
+ const data=await packRecord('cfg',{id:'main',...window.S.cfg});
+ failIfError(await supabase.from('app_records').upsert({user_id:currentUser.id,collection:'cfg',id:'main',data,updated_at:new Date().toISOString()},{onConflict:'user_id,collection,id'}));
+}
 async function syncAll(){
  if(!currentUser||loadingRemote)return;
  if(busy){queued=true;return;}
@@ -287,30 +387,82 @@ async function syncAll(){
  try{
   await writeCollection('clients',window.S.clients);await writeCollection('inst',window.S.inst);await writeCollection('maint',window.S.maint);await writeConfig();
   await Promise.all([window.kvSet('clients',window.S.clients),window.kvSet('inst',window.S.inst),window.kvSet('maint',window.S.maint),window.kvSet('cfg',window.S.cfg)]);
-  status(`Sincronizado con Firebase · ${new Date().toLocaleTimeString('es-NI',{hour:'2-digit',minute:'2-digit'})}`);
- }catch(e){console.error(e);status('No se pudo sincronizar: '+(e.code||e.message||'revisa la configuración y las reglas de Firebase'));}
+  status(`Sincronizado con Supabase · ${new Date().toLocaleTimeString('es-NI',{hour:'2-digit',minute:'2-digit'})}`);
+ }catch(e){console.error(e);status(`No se pudo sincronizar: ${e.message||'revisa el esquema, las políticas y el bucket de Supabase'}`);}
  finally{busy=false;if(queued){queued=false;syncAll();}}
 }
-window.firebaseSync=()=>{if(currentUser&&!loadingRemote)syncAll();};
-window.fbSyncNow=()=>{if(!currentUser){status('Inicia sesión primero para sincronizar.');return;}syncAll();};
-window.fbRegister=async()=>{try{const email=document.querySelector('#fbEmail')?.value.trim(),pass=document.querySelector('#fbPass')?.value;if(!email||!pass)throw new Error('Escribe correo y contraseña.');if(pass.length<6)throw new Error('La contraseña debe tener al menos 6 caracteres.');await createUserWithEmailAndPassword(auth,email,pass);status('Cuenta creada. Cargando tus datos…');}catch(e){status(authError(e));}};
-window.fbLogin=async()=>{try{const email=document.querySelector('#fbEmail')?.value.trim(),pass=document.querySelector('#fbPass')?.value;if(!email||!pass)throw new Error('Escribe correo y contraseña.');await signInWithEmailAndPassword(auth,email,pass);}catch(e){status(authError(e));}};
-window.fbLogout=async()=>{try{await signOut(auth);status('Sesión cerrada. Los datos locales permanecen en este dispositivo.');}catch(e){status(authError(e));}};
-function authError(e){const map={'auth/invalid-email':'El correo no tiene un formato válido.','auth/invalid-credential':'Correo o contraseña incorrectos.','auth/email-already-in-use':'Ese correo ya tiene una cuenta.','auth/weak-password':'La contraseña es demasiado débil.','auth/operation-not-allowed':'Activa el proveedor Correo/contraseña en Firebase Authentication.','auth/network-request-failed':'Error de conexión. Revisa Internet.'};return map[e.code]||e.message||'Error de autenticación.';}
-onAuthStateChanged(auth,async user=>{
- currentUser=user;window.firebaseRefreshStatus?.();
- if(!user)return;
- loadingRemote=true;status('Cargando datos de la nube…');
+window.cloudSync=()=>{if(currentUser&&!loadingRemote)syncAll();};
+window.cloudSyncNow=()=>{if(!currentUser){status('Inicia sesión primero para sincronizar.');return;}syncAll();};
+window.sbRegister=async()=>{
+ try{
+  const email=document.querySelector('#loginEmail')?.value.trim(),password=document.querySelector('#loginPass')?.value;
+  if(!email||!password)throw new Error('Escribe tu correo y una contraseña.');
+  if(password.length<6)throw new Error('La contraseña debe tener al menos 6 caracteres.');
+  status('Creando cuenta…');
+  const {data,error}=await supabase.auth.signUp({email,password});
+  if(error)throw error;
+  if(!data.session)status('Cuenta creada. Revisa tu correo para confirmar la dirección y luego inicia sesión.');
+ }catch(e){status(authError(e));}
+};
+window.sbLogin=async()=>{
+ try{
+  const email=document.querySelector('#loginEmail')?.value.trim(),password=document.querySelector('#loginPass')?.value;
+  if(!email||!password)throw new Error('Escribe tu correo y contraseña.');
+  status('Iniciando sesión…');
+  const {error}=await supabase.auth.signInWithPassword({email,password});
+  if(error)throw error;
+ }catch(e){status(authError(e));}
+};
+window.sbGoogleLogin=async()=>{
+ try{
+  if(location.protocol==='file:')throw new Error('Abre la aplicación desde localhost o desde un sitio publicado para iniciar con Google.');
+  status('Conectando con Google…');
+  const {error}=await supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.href}});
+  if(error)throw error;
+ }catch(e){status(authError(e));}
+};
+window.sbLogout=async()=>{try{const {error}=await supabase.auth.signOut();if(error)throw error;status('Sesión cerrada.');}catch(e){status(authError(e));}};
+function authError(e){
+ const message=String(e.message||'');
+ if(/invalid login credentials/i.test(message))return 'Correo o contraseña incorrectos.';
+ if(/email not confirmed/i.test(message))return 'Confirma tu correo antes de iniciar sesión.';
+ if(/already registered/i.test(message))return 'Ese correo ya tiene una cuenta. Inicia sesión.';
+ if(/password should be at least/i.test(message))return 'La contraseña debe tener al menos 6 caracteres.';
+ if(/provider is not enabled/i.test(message))return 'Activa el proveedor de acceso correspondiente en Supabase Authentication.';
+ if(/redirect.*not allowed|url.*not allowed/i.test(message))return 'Agrega la URL de esta aplicación a las URLs permitidas en Supabase Authentication.';
+ return message||'Error de autenticación.';
+}
+async function handleSession(user){
+ currentUser=user;
+ window.cloudRefreshStatus?.();
+ if(!user){authLoadSequence++;loadingUserId='';loadedUserId='';loadingRemote=false;signedAssetPaths.clear();showLogin();return;}
+ if(loadedUserId===user.id){showApp();return;}
+ if(loadingUserId===user.id)return;
+ const sequence=++authLoadSequence;
+ loadingUserId=user.id;loadingRemote=true;status('Cargando tus datos de Supabase…');
  try{
   await window.localReady;
-  const [clients,inst,maint,cfgSnap]=await Promise.all([readCollection('clients'),readCollection('inst'),readCollection('maint'),getDocs(collection(db,'users',user.uid,'cfg'))]);
-  const cfg=cfgSnap.docs.find(d=>d.id==='main')?.data();
-  // Fusiona por ID: la nube prevalece en registros repetidos y se conservan registros locales exclusivos.
-  const merge=(local,remote)=>{const m=new Map((local||[]).map(x=>[String(x.id),x]));for(const x of remote)m.set(String(x.id),x);return [...m.values()];};
-  window.S.clients=merge(window.S.clients,clients);window.S.inst=merge(window.S.inst,inst);window.S.maint=merge(window.S.maint,maint);
-  if(cfg){const {id,...rest}=cfg;Object.assign(window.S.cfg,rest);}
+  const [clients,inst,maint,cfg]=await Promise.all([readCollection('clients'),readCollection('inst'),readCollection('maint'),readConfig()]);
+  if(sequence!==authLoadSequence||currentUser?.id!==user.id)return;
+  // Start from this Supabase account only; browser data from another backend is not imported.
+  window.S.clients=clients;window.S.inst=inst;window.S.maint=maint;
+  window.S.cfg={name:'Mi Empresa',logo:'',tech:'',phone:'',addr:'',techs:'',theme:'auto',...(cfg||{})};
   await Promise.all([window.kvSet('clients',window.S.clients),window.kvSet('inst',window.S.inst),window.kvSet('maint',window.S.maint),window.kvSet('cfg',window.S.cfg)]);
-  loadingRemote=false;await syncAll();window.brand();window.go(window.view);status(`Sesión iniciada: ${user.email}. Datos sincronizados.`);
- }catch(e){loadingRemote=false;console.error(e);status('Error al cargar Firebase: '+(e.code||e.message||'comprueba las reglas'));}
-});
+  loadedUserId=user.id;loadingUserId='';loadingRemote=false;
+  window.brand();showApp();window.go('dash');await syncAll();
+ }catch(e){
+  if(sequence!==authLoadSequence||currentUser?.id!==user.id)return;
+  loadingUserId='';loadingRemote=false;console.error(e);
+  const message=e.code==='PGRST205'||/could not find the table ['"]?public\.app_records/i.test(e.message||'')
+   ?'Falta la tabla public.app_records. En Supabase, abre SQL Editor, ejecuta el contenido de supabase-schema.sql y vuelve a cargar la app. Si ya ejecutaste el SQL, ejecuta NOTIFY pgrst, \'reload schema\'; en el SQL Editor.'
+   :`Error al cargar Supabase: ${e.message||'verifica el esquema, las políticas y el almacenamiento'}`;
+  status(message);
+ }
+}
+supabase.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>handleSession(session?.user||null),0);});
+window.localReady.then(async()=>{
+ const {data,error}=await supabase.auth.getSession();
+ if(error){status(authError(error));return;}
+ await handleSession(data.session?.user||null);
+}).catch(e=>{console.error(e);status(`No se pudieron cargar los datos locales: ${e.message||'error de almacenamiento'}`);});
 </script></body></html>
