@@ -10,6 +10,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
 .app{display:flex;min-height:100vh}
 .side{width:224px;flex:none;background:var(--side);color:#c5cee2;position:sticky;top:env(safe-area-inset-top,0px);height:100vh}
+.mobile-topbar,.nav-backdrop{display:none}
 .brand{position:relative;display:flex;flex-direction:column;gap:14px;padding:18px 14px;color:#fff;font-weight:700;line-height:1.2}
 .brand-company{display:flex;gap:10px;align-items:center;min-width:0;padding:0 2px}
 .brand-company span{overflow-wrap:anywhere}
@@ -77,8 +78,11 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
 .login-showcase:before,.login-showcase:after{content:"";position:absolute;z-index:-1;border:1px solid #ffffff1f;border-radius:50%;animation:orbit 24s linear infinite}
 .login-showcase:before{width:420px;height:420px;right:-145px;top:-115px;box-shadow:0 0 0 36px #ffffff08,0 0 0 72px #ffffff06}
 .login-showcase:after{width:230px;height:230px;left:-115px;bottom:-92px;animation-direction:reverse}
-.login-brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:.01em}
-.login-brand-icon{width:42px;height:42px;display:grid;place-items:center;border:1px solid #ffffff40;border-radius:13px;background:#ffffff18;font-size:21px}
+.login-company{display:flex;align-items:center;gap:18px;margin:0 0 28px;animation:login-fade .7s both}
+.login-company-logo{width:82px;height:82px;display:grid;place-items:center;flex:none;overflow:hidden;border:1px solid #ffffff38;border-radius:22px;background:#fff;color:#0b5fd9;box-shadow:0 12px 28px #00152e44;font-size:36px}
+.login-company-logo img{width:100%;height:100%;object-fit:contain}
+.login-company-name{max-width:390px;margin:0;color:#fff;font-size:clamp(24px,3vw,36px);font-weight:750;line-height:1.1;letter-spacing:-.04em;overflow-wrap:anywhere}
+.login-company-caption{display:block;margin-top:7px;color:#c9def8;font-size:12px;font-weight:600;letter-spacing:.11em;text-transform:uppercase}
 .login-copy{max-width:440px;animation:login-fade .8s .12s both}
 .login-eyebrow{display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;color:#c9e0ff;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
 .login-eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:#6ee7b7;box-shadow:0 0 14px #6ee7b7}
@@ -93,6 +97,8 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
 .login-field{margin-bottom:17px}.login-field label{font-weight:600;color:var(--tx);margin-bottom:6px}
 .login-card input{padding:12px;transition:border-color .2s,box-shadow .2s,background .2s}
 .login-card input:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 4px color-mix(in srgb,var(--pri) 15%,transparent)}
+.remember-row{display:flex;align-items:center;gap:8px;margin:0;color:var(--mut);font-size:13px;cursor:pointer}
+.remember-row input{width:auto;margin:0;accent-color:var(--pri)}
 .login-actions{display:grid;gap:10px;margin-top:21px}
 .login-actions .btn{width:100%;padding:12px;transition:transform .18s,box-shadow .18s,background .18s}
 .login-actions .btn:hover{transform:translateY(-2px);box-shadow:0 7px 16px #0b5fd933}
@@ -109,12 +115,22 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
 @keyframes login-fade{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
 @keyframes orbit{to{transform:rotate(360deg)}}
 @media print{body.printing>*:not(#printRoot){display:none!important}body.printing #printRoot{display:block}.rp{padding:0}}
-@media (max-width:760px){.app{flex-direction:column}
-.side{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:auto;z-index:20;padding-bottom:env(safe-area-inset-bottom,0px)}
-.brand{display:none}.nav{display:flex}.nav button{flex-direction:column;align-items:center;font-size:11px;padding:8px 2px;gap:1px;text-align:center}
-.main{padding:16px 14px 96px}.f2{grid-template-columns:1fr}.kv{grid-template-columns:1fr}
+@media (max-width:760px){.app{display:block;min-height:100vh}
+.side{position:fixed;z-index:90;inset:0 auto 0 0;width:min(300px,86vw);height:100vh;height:100dvh;overflow-y:auto;overscroll-behavior:contain;box-shadow:14px 0 40px #0004;transform:translateX(-105%);transition:transform .24s cubic-bezier(.2,.75,.25,1)}
+.side.open{transform:translateX(0)}
+.brand{display:flex;padding-top:calc(18px + env(safe-area-inset-top,0px))}
+.nav{display:flex;flex-direction:column;padding:4px 10px 22px}
+.nav button{align-items:center;padding:12px 14px;border-radius:9px;font-size:14px;gap:12px}
+.nav button.on{box-shadow:inset 3px 0 #4d90ff}
+.mobile-topbar{position:sticky;top:0;z-index:15;display:flex;align-items:center;gap:13px;min-height:58px;padding:0 15px;border-bottom:1px solid var(--bd);background:var(--card);box-shadow:0 2px 8px #1423410b}
+.mobile-menu-button{width:40px;height:40px;display:grid;place-items:center;flex:none;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font-size:21px;cursor:pointer}
+.mobile-menu-title{overflow:hidden;color:var(--tx);font-size:15px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}
+.nav-backdrop{position:fixed;z-index:80;inset:0;display:block;border:0;background:#0712259c;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
+.nav-backdrop.open{opacity:1;visibility:visible}
+.main{padding:18px 14px calc(24px + env(safe-area-inset-bottom,0px))}
+.f2{grid-template-columns:1fr}.kv{grid-template-columns:1fr}
 #loginScreen{padding:16px;align-items:start}.login-layout{max-width:480px;min-height:0;grid-template-columns:1fr;border-radius:22px}
-.login-showcase{min-height:235px;padding:25px 27px 23px}.login-brand-icon{width:36px;height:36px}.login-copy{margin:24px 0 17px}.login-copy h2{font-size:29px;margin-bottom:8px}.login-copy p{font-size:13px}
+.login-showcase{min-height:300px;padding:25px 27px 23px}.login-company{gap:13px;margin:19px 0 18px}.login-company-logo{width:58px;height:58px;border-radius:16px;font-size:26px}.login-company-name{font-size:25px}.login-company-caption{font-size:10px;margin-top:4px}.login-copy{margin:14px 0 17px}.login-copy h2{font-size:29px;margin-bottom:8px}.login-copy p{font-size:13px}
 .login-preview{max-width:none}.preview-stat{padding:9px 12px}.preview-stat strong{font-size:17px}
 .login-card{padding:28px 27px 25px}.login-mark{display:none}.login-card h1{font-size:24px}.login-intro{margin-bottom:20px}}
 @media (max-width:380px){.login-showcase{padding:22px}.login-card{padding:25px 21px}.login-copy h2{font-size:26px}}
@@ -124,8 +140,8 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
 <section id="loginScreen" aria-labelledby="loginTitle">
  <div class="login-layout">
   <div class="login-showcase">
-   <div class="login-brand"><span class="login-brand-icon" aria-hidden="true">✦</span><span>Gestión de instalaciones</span></div>
-   <div class="login-copy"><span class="login-eyebrow">Tu trabajo, en orden</span><h2>Cada instalación cuenta.</h2><p>Clientes, equipos y mantenimientos reunidos en un solo lugar. Entra y sigue construyendo un servicio excepcional.</p></div>
+  <div class="login-company"><span class="login-company-logo" id="loginCompanyLogo" aria-hidden="true">✦</span><div><h1 class="login-company-name" id="loginCompanyName">Mi Empresa</h1><span class="login-company-caption">Gestión de instalaciones</span></div></div>
+  <div class="login-copy"><span class="login-eyebrow">Tu trabajo, en orden</span><h2>La gestión de tus servicios, más sencilla.</h2><p>Clientes, equipos y mantenimientos reunidos en un solo lugar. Entra y sigue construyendo un servicio excepcional.</p></div>
    <div class="login-preview" aria-label="Resumen de la aplicación"><div class="preview-stat"><span>Todo conectado</span><strong>Clientes</strong></div><div class="preview-stat"><span>Siempre al día</span><strong>Servicios</strong></div></div>
   </div>
   <div class="login-card">
@@ -135,6 +151,7 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
    <form onsubmit="event.preventDefault();sbLogin()">
     <div class="login-field"><label for="loginEmail">Correo electrónico</label><input id="loginEmail" name="email" type="email" autocomplete="username" placeholder="tu@empresa.com" required></div>
     <div class="login-field"><label for="loginPass">Contraseña</label><input id="loginPass" name="password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required></div>
+    <label class="remember-row"><input id="rememberUser" type="checkbox"> Recordar mi correo en este dispositivo</label>
     <div class="login-actions">
      <button class="btn login-primary" type="submit">Iniciar sesión</button>
      <button class="btn g" type="button" onclick="sbRegister()">Crear cuenta con correo</button>
@@ -148,7 +165,9 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
  </div>
 </section>
 <div class="app" id="appShell" hidden>
- <aside class="side"><div class="brand" id="brand"></div><nav class="nav" id="nav"></nav></aside>
+ <button class="nav-backdrop" id="navBackdrop" type="button" aria-label="Cerrar menú" onclick="closeNavMenu()" tabindex="-1"></button>
+ <aside class="side" id="sideMenu" aria-label="Menú principal"><div class="brand" id="brand"></div><nav class="nav" id="nav"></nav></aside>
+ <div class="mobile-topbar"><button class="mobile-menu-button" id="menuToggle" type="button" aria-label="Abrir menú" aria-controls="sideMenu" aria-expanded="false" onclick="toggleNavMenu()">☰</button><span class="mobile-menu-title" id="mobileTitle">Panel</span></div>
  <main class="main" id="main"></main>
 </div>
 <div id="modal"></div><div id="lb" onclick="this.style.display='none'"></div><div id="toast"></div><div id="printRoot"></div>
@@ -159,8 +178,22 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const today=()=>new Date().toISOString().slice(0,10);
 const fmt=d=>d?new Date(d+'T00:00').toLocaleDateString('es-NI',{day:'2-digit',month:'short',year:'numeric'}):'';
 const money=n=>n?'C$ '+Number(n).toLocaleString('es-NI'):'—';
-const TYPES=['Cámaras de seguridad','Sistema eléctrico','Alarma y control de acceso','Mantenimiento','Otro'],STAT=['Completada','En proceso','Pendiente'];
+const TYPES=['Cámaras de seguridad','Sistema eléctrico','Alarma y control de acceso','Mantenimiento','Venta de cámaras','Venta e instalación','Instalación de cámaras','Reparación','Reparación y diagnóstico','Mantenimiento preventivo','Mantenimiento correctivo','Configuración y soporte','Otro'],STAT=['Completada','En proceso','Pendiente'];
 let S={clients:[],inst:[],maint:[],cfg:{name:'Mi Empresa',logo:'',tech:'',phone:'',addr:'',techs:'',theme:'auto'}},view='dash',tmp={photos:[],qr:''};
+const REMEMBERED_EMAIL_KEY='gestor-inst-remembered-email';
+function initRememberUser(){
+ const emailInput=$('#loginEmail'),remember=$('#rememberUser');if(!emailInput||!remember)return;
+ try{const saved=localStorage.getItem(REMEMBERED_EMAIL_KEY);if(saved){emailInput.value=saved;remember.checked=true;}}
+ catch(e){console.warn('No se pudo leer el correo recordado.',e);}
+ const persist=()=>{
+  try{
+   if(remember.checked&&emailInput.value.trim())localStorage.setItem(REMEMBERED_EMAIL_KEY,emailInput.value.trim());
+   else localStorage.removeItem(REMEMBERED_EMAIL_KEY);
+  }catch(e){console.warn('No se pudo guardar el correo recordado.',e);}
+ };
+ remember.addEventListener('change',persist);emailInput.addEventListener('input',persist);
+}
+initRememberUser();
 /* Almacenamiento local (IndexedDB) */
 const idb=()=>new Promise((ok,no)=>{const r=indexedDB.open('gestor-inst',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
 async function kvGet(k){try{const db=await idb();return await new Promise(r=>{const q=db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r()})}catch(e){}}
@@ -177,6 +210,9 @@ const confirmBtn=(label,fn)=>`<button class="btn d" onclick="if(!this.dataset.c)
 /* Navegación */
 function brand(){
  const c=S.cfg,p=window.profileData||{},avatar=p.avatar?`<img src="${esc(p.avatar)}" alt="">`:'<span aria-hidden="true">👤</span>';
+ const companyLogo=$('#loginCompanyLogo'),companyName=$('#loginCompanyName');
+ if(companyLogo)companyLogo.innerHTML=c.logo?`<img src="${esc(c.logo)}" alt="${esc(c.name)}">`:'✦';
+ if(companyName)companyName.textContent=c.name||'Mi Empresa';
  $('#brand').innerHTML=`<div class="brand-company">${c.logo?`<img src="${esc(c.logo)}" alt="">`:`<i>${esc((c.name||'?')[0])}</i>`}<span>${esc(c.name)}</span></div>
   <button class="profile-trigger" type="button" aria-haspopup="dialog" aria-controls="profilePopover" aria-expanded="false" onclick="toggleProfileMenu()">
    <span class="profile-avatar">${avatar}</span><span class="profile-label"><small>Cuenta</small><strong>${esc(p.name||p.email||'Usuario')}</strong></span><span class="profile-chevron" aria-hidden="true">⌄</span>
@@ -198,8 +234,34 @@ function brand(){
   </div>`;
  document.title=c.name+' – Gestión de instalaciones';
  if(c.theme==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=c.theme}
-function nav(){$('#nav').innerHTML=[['dash','Panel','🏠'],['clients','Clientes','👥'],['inst','Instalaciones','🛠'],['maint','Mantenimiento','🗓️'],['rep','Reportes','📄'],['cfg','Configuración','⚙']].map(n=>`<button class="${view===n[0]?'on':''}" onclick="go('${n[0]}')"><span>${n[2]}</span>${n[1]}</button>`).join('')}
-function go(v){view=v;nav();({dash:Vdash,clients:Vcl,inst:Vin,maint:Vmaint,rep:Vrep,cfg:Vcfg})[v]()}
+function nav(){
+ const items=[['dash','Panel','🏠'],['clients','Clientes','👥'],['inst','Instalaciones','🛠'],['maint','Mantenimiento','🗓️'],['rep','Reportes','📄'],['cfg','Configuración','⚙']];
+ $('#nav').innerHTML=items.map(n=>`<button class="${view===n[0]?'on':''}" ${view===n[0]?'aria-current="page"':''} onclick="go('${n[0]}')"><span>${n[2]}</span>${n[1]}</button>`).join('');
+ const title=$('#mobileTitle');if(title)title.textContent=(items.find(n=>n[0]===view)||items[0])[1];
+}
+function toggleNavMenu(){
+ const side=$('#sideMenu'),backdrop=$('#navBackdrop'),button=$('#menuToggle');
+ if(!side||!backdrop||!button)return;
+ const open=!side.classList.contains('open');
+ side.classList.toggle('open',open);backdrop.classList.toggle('open',open);
+ side.inert=!open;side.setAttribute('aria-hidden',String(!open));
+ button.setAttribute('aria-expanded',String(open));button.setAttribute('aria-label',open?'Cerrar menú':'Abrir menú');
+ document.body.style.overflow=open?'hidden':'';
+ if(open)side.querySelector('.nav button')?.focus();
+ else button.focus();
+}
+function closeNavMenu(){
+ const side=$('#sideMenu'),backdrop=$('#navBackdrop'),button=$('#menuToggle');
+ if(!side||!backdrop||!button)return;
+ side.classList.remove('open');backdrop.classList.remove('open');
+ const mobile=window.matchMedia('(max-width: 760px)').matches;
+ side.inert=mobile;side.setAttribute('aria-hidden',String(mobile));
+ button.setAttribute('aria-expanded','false');button.setAttribute('aria-label','Abrir menú');
+ document.body.style.overflow='';
+}
+function go(v){view=v;nav();({dash:Vdash,clients:Vcl,inst:Vin,maint:Vmaint,rep:Vrep,cfg:Vcfg})[v]();closeNavMenu()}
+document.addEventListener('keydown',event=>{if(event.key==='Escape')closeNavMenu();});
+window.addEventListener('resize',()=>{if(window.innerWidth>760)closeNavMenu();});
 const render=()=>go(view);
 const card=i=>`<div class="card item" onclick="instView('${i.id}')">${i.photos[0]?`<img class="thumb" src="${i.photos[0]}" alt="">`:'<div class="thumb">📷</div>'}<div><b>${esc(cname(i.client))}</b><div>${esc(i.type)} <span class="badge">${esc(i.status)}</span></div><small class="mut">${fmt(i.date)} · ${esc(i.tech||'Sin técnico')} · ${money(i.cost)}</small></div></div>`;
 /* Panel */
