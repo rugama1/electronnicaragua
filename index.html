@@ -10,9 +10,33 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
 .app{display:flex;min-height:100vh}
 .side{width:224px;flex:none;background:var(--side);color:#c5cee2;position:sticky;top:env(safe-area-inset-top,0px);height:100vh}
-.brand{display:flex;gap:10px;align-items:center;padding:18px 16px;color:#fff;font-weight:700;line-height:1.2}
-.brand img,.brand i{width:38px;height:38px;border-radius:8px;object-fit:contain;background:#fff;flex:none}
-.brand i{background:var(--pri);display:grid;place-items:center;font-style:normal}
+.brand{position:relative;display:flex;flex-direction:column;gap:14px;padding:18px 14px;color:#fff;font-weight:700;line-height:1.2}
+.brand-company{display:flex;gap:10px;align-items:center;min-width:0;padding:0 2px}
+.brand-company span{overflow-wrap:anywhere}
+.brand-company img,.brand-company i{width:38px;height:38px;border-radius:8px;object-fit:contain;background:#fff;flex:none}
+.brand-company i{background:var(--pri);display:grid;place-items:center;font-style:normal}
+.profile-trigger{display:flex;align-items:center;gap:10px;width:100%;padding:9px 8px;border:1px solid #ffffff20;border-radius:11px;background:#ffffff0a;color:#fff;font:inherit;text-align:left;cursor:pointer;transition:background .18s,border-color .18s}
+.profile-trigger:hover,.profile-trigger[aria-expanded="true"]{background:#ffffff16;border-color:#ffffff40}
+.profile-avatar{width:34px;height:34px;display:grid;place-items:center;flex:none;overflow:hidden;border-radius:50%;background:#294568;color:#fff;font-size:15px}
+.profile-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-label{min-width:0;flex:1}
+.profile-label small{display:block;color:#9eacc4;font-size:10px;font-weight:500}
+.profile-label strong{display:block;overflow:hidden;color:#fff;font-size:12px;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
+.profile-chevron{color:#9eacc4;font-size:12px}
+.profile-popover{position:absolute;z-index:40;top:calc(100% - 7px);left:12px;width:276px;box-sizing:border-box;padding:17px;border:1px solid var(--bd);border-radius:14px;background:var(--card);color:var(--tx);box-shadow:0 14px 38px #0004;animation:profile-open .16s ease-out both}
+.profile-popover[hidden]{display:none}
+.profile-popover h2{margin:0 0 12px;font-size:15px}
+.profile-popover label{margin:10px 0 4px;color:var(--mut);font-size:12px}
+.profile-popover input{padding:8px 9px;font-size:13px}
+.profile-popover .btn{padding:7px 10px;font-size:12px}
+.profile-popover .profile-file{display:block;margin-top:10px}
+.profile-popover .profile-file input{font-size:11px}
+.profile-section{padding-bottom:13px;border-bottom:1px solid var(--bd)}
+.profile-section:last-of-type{padding-bottom:0;border-bottom:0}
+.profile-actions{display:flex;gap:7px;margin-top:9px}
+.profile-actions .btn{flex:1}
+.profile-message{min-height:16px;margin:9px 0 0;color:var(--mut);font-size:11px}
+@keyframes profile-open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 .nav button{display:flex;gap:10px;width:100%;padding:12px 16px;background:none;border:0;color:inherit;font:inherit;cursor:pointer;text-align:left}
 .nav button.on{background:rgba(255,255,255,.09);color:#fff;box-shadow:inset 3px 0 #4d90ff}
 .main{flex:1;min-width:0;padding:26px;max-width:1180px}
@@ -151,7 +175,28 @@ const cname=id=>(S.clients.find(c=>c.id===id)||{}).name||'(cliente eliminado)';
 const g=id=>$('#f_'+id).value.trim();
 const confirmBtn=(label,fn)=>`<button class="btn d" onclick="if(!this.dataset.c){this.dataset.c=1;this.textContent='¿Confirmar eliminación?';return}${fn}">${label}</button>`;
 /* Navegación */
-function brand(){const c=S.cfg;$('#brand').innerHTML=(c.logo?`<img src="${c.logo}" alt="">`:`<i>${esc((c.name||'?')[0])}</i>`)+`<span>${esc(c.name)}</span>`;document.title=c.name+' – Gestión de instalaciones';
+function brand(){
+ const c=S.cfg,p=window.profileData||{},avatar=p.avatar?`<img src="${esc(p.avatar)}" alt="">`:'<span aria-hidden="true">👤</span>';
+ $('#brand').innerHTML=`<div class="brand-company">${c.logo?`<img src="${esc(c.logo)}" alt="">`:`<i>${esc((c.name||'?')[0])}</i>`}<span>${esc(c.name)}</span></div>
+  <button class="profile-trigger" type="button" aria-haspopup="dialog" aria-controls="profilePopover" aria-expanded="false" onclick="toggleProfileMenu()">
+   <span class="profile-avatar">${avatar}</span><span class="profile-label"><small>Cuenta</small><strong>${esc(p.name||p.email||'Usuario')}</strong></span><span class="profile-chevron" aria-hidden="true">⌄</span>
+  </button>
+  <div class="profile-popover" id="profilePopover" role="dialog" aria-label="Mi cuenta" hidden>
+   <h2>Mi cuenta</h2>
+   <div class="profile-section">
+    <label for="profileName">Nombre</label><input id="profileName" type="text" maxlength="80" value="${esc(p.name||'')}" placeholder="Tu nombre">
+    <div class="profile-actions"><button class="btn" type="button" onclick="saveProfileName()">Guardar nombre</button></div>
+    <label class="profile-file" for="profilePhoto">Fotografía</label><input id="profilePhoto" type="file" accept="image/jpeg,image/png,image/webp" onchange="uploadProfilePhoto(this)">
+   </div>
+   <div class="profile-section" style="padding-top:12px">
+    <label for="profilePassword">Nueva contraseña</label><input id="profilePassword" type="password" autocomplete="new-password" minlength="6" placeholder="Mínimo 6 caracteres">
+    <label for="profilePasswordConfirm">Confirmar contraseña</label><input id="profilePasswordConfirm" type="password" autocomplete="new-password" minlength="6" placeholder="Repite la contraseña">
+    <div class="profile-actions"><button class="btn g" type="button" onclick="changeProfilePassword()">Cambiar contraseña</button></div>
+   </div>
+   <p class="profile-message" id="profileMessage" role="status" aria-live="polite">${esc(p.email||'')}</p>
+   <div class="profile-actions"><button class="btn d" type="button" onclick="sbLogout()">Cerrar sesión</button></div>
+  </div>`;
+ document.title=c.name+' – Gestión de instalaciones';
  if(c.theme==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=c.theme}
 function nav(){$('#nav').innerHTML=[['dash','Panel','🏠'],['clients','Clientes','👥'],['inst','Instalaciones','🛠'],['maint','Mantenimiento','🗓️'],['rep','Reportes','📄'],['cfg','Configuración','⚙']].map(n=>`<button class="${view===n[0]?'on':''}" onclick="go('${n[0]}')"><span>${n[2]}</span>${n[1]}</button>`).join('')}
 function go(v){view=v;nav();({dash:Vdash,clients:Vcl,inst:Vin,maint:Vmaint,rep:Vrep,cfg:Vcfg})[v]()}
@@ -421,7 +466,14 @@ window.sbGoogleLogin=async()=>{
   if(error)throw error;
  }catch(e){status(authError(e));}
 };
-window.sbLogout=async()=>{try{const {error}=await supabase.auth.signOut();if(error)throw error;status('Sesión cerrada.');}catch(e){status(authError(e));}};
+window.sbLogout=async()=>{
+ try{
+  const {error}=await supabase.auth.signOut();
+  if(error)throw error;
+  currentUser=null;loadedUserId='';loadingUserId='';loadingRemote=false;signedAssetPaths.clear();window.profileData=null;
+  showLogin();status('Sesión cerrada.');
+ }catch(e){status(authError(e));}
+};
 function authError(e){
  const message=String(e.message||'');
  if(/invalid login credentials/i.test(message))return 'Correo o contraseña incorrectos.';
@@ -432,11 +484,83 @@ function authError(e){
  if(/redirect.*not allowed|url.*not allowed/i.test(message))return 'Agrega la URL de esta aplicación a las URLs permitidas en Supabase Authentication.';
  return message||'Error de autenticación.';
 }
+async function refreshProfile(user){
+ const metadata=user.user_metadata||{},avatarPath=metadata.avatar_path;
+ let avatar=metadata.avatar_url||'';
+ if(avatarPath){
+  const result=await supabase.storage.from(STORAGE_BUCKET).createSignedUrl(avatarPath,3600);
+  avatar=failIfError(result).signedUrl;
+ }
+ window.profileData={
+  name:metadata.display_name||metadata.full_name||metadata.name||user.email?.split('@')[0]||'Usuario',
+  email:user.email||'',
+  avatar
+ };
+ window.brand();
+}
+function profileMessage(message,isError=false){
+ const element=document.querySelector('#profileMessage');
+ if(element){element.textContent=message;element.style.color=isError?'var(--dan)':'var(--mut)';}
+}
+window.toggleProfileMenu=()=>{
+ const popover=document.querySelector('#profilePopover'),trigger=document.querySelector('.profile-trigger');
+ if(!popover||!trigger)return;
+ popover.hidden=!popover.hidden;
+ trigger.setAttribute('aria-expanded',String(!popover.hidden));
+ if(!popover.hidden)document.querySelector('#profileName')?.focus();
+};
+function closeProfileMenu(){
+ const popover=document.querySelector('#profilePopover'),trigger=document.querySelector('.profile-trigger');
+ if(popover)popover.hidden=true;
+ if(trigger)trigger.setAttribute('aria-expanded','false');
+}
+document.addEventListener('click',event=>{
+ if(!event.target.closest('.profile-trigger,.profile-popover'))closeProfileMenu();
+});
+document.addEventListener('keydown',event=>{if(event.key==='Escape')closeProfileMenu();});
+window.saveProfileName=async()=>{
+ try{
+  const name=document.querySelector('#profileName')?.value.trim();
+  if(!name)throw new Error('Escribe el nombre que quieres mostrar.');
+  if(name.length>80)throw new Error('El nombre no puede superar 80 caracteres.');
+  const {data,error}=await supabase.auth.updateUser({data:{...currentUser.user_metadata,display_name:name}});
+  if(error)throw error;
+  currentUser=data.user;await refreshProfile(data.user);profileMessage('Nombre actualizado.');toast('Nombre actualizado');
+ }catch(e){profileMessage(e.message||'No se pudo actualizar el nombre.',true);}
+};
+window.changeProfilePassword=async()=>{
+ try{
+  const password=document.querySelector('#profilePassword')?.value||'';
+  const confirmation=document.querySelector('#profilePasswordConfirm')?.value||'';
+  if(password.length<6)throw new Error('La contraseña debe tener al menos 6 caracteres.');
+  if(password!==confirmation)throw new Error('Las contraseñas no coinciden.');
+  const {error}=await supabase.auth.updateUser({password});
+  if(error)throw error;
+  $('#profilePassword').value='';$('#profilePasswordConfirm').value='';
+  profileMessage('Contraseña actualizada.');toast('Contraseña actualizada');
+ }catch(e){profileMessage(e.message||'No se pudo cambiar la contraseña.',true);}
+};
+window.uploadProfilePhoto=async(input)=>{
+ const file=input.files?.[0];if(!file)return;
+ try{
+  if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw new Error('Elige una imagen JPG, PNG o WebP.');
+  profileMessage('Subiendo fotografía…');
+  const dataUrl=await img(file,512,'image/jpeg');
+  const blob=await fetch(dataUrl).then(response=>response.blob());
+  const path=`${currentUser.id}/profile/avatar.jpg`;
+  const result=await supabase.storage.from(STORAGE_BUCKET).upload(path,blob,{upsert:true,contentType:'image/jpeg'});
+  failIfError(result);
+  const {data,error}=await supabase.auth.updateUser({data:{...currentUser.user_metadata,avatar_path:path}});
+  if(error)throw error;
+  currentUser=data.user;await refreshProfile(data.user);profileMessage('Fotografía actualizada.');toast('Fotografía actualizada');
+ }catch(e){profileMessage(e.message||'No se pudo cambiar la fotografía.',true);}
+ finally{input.value='';}
+};
 async function handleSession(user){
  currentUser=user;
  window.cloudRefreshStatus?.();
- if(!user){authLoadSequence++;loadingUserId='';loadedUserId='';loadingRemote=false;signedAssetPaths.clear();showLogin();return;}
- if(loadedUserId===user.id){showApp();return;}
+ if(!user){authLoadSequence++;loadingUserId='';loadedUserId='';loadingRemote=false;signedAssetPaths.clear();window.profileData=null;showLogin();return;}
+ if(loadedUserId===user.id){await refreshProfile(user);showApp();return;}
  if(loadingUserId===user.id)return;
  const sequence=++authLoadSequence;
  loadingUserId=user.id;loadingRemote=true;status('Cargando tus datos de Supabase…');
@@ -449,7 +573,7 @@ async function handleSession(user){
   window.S.cfg={name:'Mi Empresa',logo:'',tech:'',phone:'',addr:'',techs:'',theme:'auto',...(cfg||{})};
   await Promise.all([window.kvSet('clients',window.S.clients),window.kvSet('inst',window.S.inst),window.kvSet('maint',window.S.maint),window.kvSet('cfg',window.S.cfg)]);
   loadedUserId=user.id;loadingUserId='';loadingRemote=false;
-  window.brand();showApp();window.go('dash');await syncAll();
+  await refreshProfile(user);showApp();window.go('dash');await syncAll();
  }catch(e){
   if(sequence!==authLoadSequence||currentUser?.id!==user.id)return;
   loadingUserId='';loadingRemote=false;console.error(e);
