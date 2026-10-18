@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gestión de instalaciones</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#eef1f6;--card:#fff;--tx:#12203a;--mut:#667592;--bd:#dde3ee;--pri:#0b5fd9;--pri2:#e6effc;--side:#0e1a30;--dan:#c62828;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a111f;--card:#131c2e;--tx:#e8edf7;--mut:#8f9bb5;--bd:#25314a;--pri:#5b9bff;--pri2:#16264a;--side:#060b16;--dan:#f87171;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0a111f;--card:#131c2e;--tx:#e8edf7;--mut:#8f9bb5;--bd:#25314a;--pri:#5b9bff;--pri2:#16264a;--side:#060b16;--dan:#f87171;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+.app{display:flex;min-height:100vh}
+.side{width:224px;flex:none;background:var(--side);color:#c5cee2;position:sticky;top:env(safe-area-inset-top,0px);height:100vh}
+.brand{display:flex;gap:10px;align-items:center;padding:18px 16px;color:#fff;font-weight:700;line-height:1.2}
+.brand img,.brand i{width:38px;height:38px;border-radius:8px;object-fit:contain;background:#fff;flex:none}
+.brand i{background:var(--pri);display:grid;place-items:center;font-style:normal}
+.nav button{display:flex;gap:10px;width:100%;padding:12px 16px;background:none;border:0;color:inherit;font:inherit;cursor:pointer;text-align:left}
+.nav button.on{background:rgba(255,255,255,.09);color:#fff;box-shadow:inset 3px 0 #4d90ff}
+.main{flex:1;min-width:0;padding:26px;max-width:1180px}
+h1{font-size:22px;margin:0 0 16px}h2{font-size:16px;margin:20px 0 10px}
+.mut{color:var(--mut)}
+input,select,textarea{width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);font:inherit}
+textarea{min-height:70px;resize:vertical}
+label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
+.btn{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:9px 15px;font:inherit;font-weight:600;cursor:pointer}
+.btn.g{background:var(--pri2);color:var(--pri)}.btn.d{background:none;color:var(--dan);border:1px solid var(--bd)}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}.bar>input{flex:1;min-width:200px}.bar>select{width:auto}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(20,35,65,.035);transition:border-color .18s,transform .18s}.card.item:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(20,35,65,.08)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.stats b{font-size:26px;display:block}
+.item{cursor:pointer;display:flex;gap:12px}.item:hover{border-color:var(--pri)}
+.thumb{width:66px;height:66px;border-radius:8px;object-fit:cover;background:var(--pri2);flex:none;display:grid;place-items:center;font-size:24px}
+.badge{font-size:12px;padding:1px 8px;border-radius:99px;background:var(--pri2);color:var(--pri);white-space:nowrap}
+#modal{position:fixed;inset:0;background:rgba(5,10,25,.62);display:none;justify-content:center;align-items:flex-start;overflow:auto;padding:18px;z-index:50}
+.mb{background:var(--card);border-radius:12px;width:100%;max-width:740px;padding:20px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}.f1{margin-bottom:12px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.ph{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.ph div{position:relative}
+.ph img{width:96px;height:96px;object-fit:cover;border-radius:8px;cursor:pointer;display:block}
+.ph b{position:absolute;top:3px;right:3px;background:#000b;color:#fff;border-radius:99px;width:20px;height:20px;text-align:center;cursor:pointer;font-size:13px;line-height:20px}
+.sec{cursor:pointer;font-family:ui-monospace,Consolas,monospace;background:var(--pri2);padding:1px 7px;border-radius:5px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:4px 12px;margin:0}.kv dt{color:var(--mut)}.kv dd{margin:0;overflow-wrap:anywhere}
+#lb{position:fixed;inset:0;background:#000d;display:none;z-index:60;align-items:center;justify-content:center}#lb img{max-width:94%;max-height:92%}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#12203a;color:#fff;padding:9px 16px;border-radius:8px;display:none;z-index:70}
+.rp{background:#fff;color:#111;padding:18px;border-radius:8px;font-size:13px}
+.rp table{width:100%;border-collapse:collapse;margin:10px 0}.rp td,.rp th{border:1px solid #bbb;padding:5px 7px;text-align:left;vertical-align:top}.rp th{background:#eef1f6}
+.rh{display:flex;gap:12px;align-items:center;border-bottom:2px solid #0b5fd9;padding-bottom:10px}.rh img{height:52px;max-width:120px;object-fit:contain}.rh h2{margin:0}
+.blk{break-inside:avoid;border:1px solid #bbb;border-radius:6px;padding:10px;margin:10px 0}.rp .ph img{width:140px;height:105px}
+#printRoot{display:none}
+@media print{body.printing>*:not(#printRoot){display:none!important}body.printing #printRoot{display:block}.rp{padding:0}}
+@media (max-width:760px){.app{flex-direction:column}
+.side{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;height:auto;z-index:20;padding-bottom:env(safe-area-inset-bottom,0px)}
+.brand{display:none}.nav{display:flex}.nav button{flex-direction:column;align-items:center;font-size:11px;padding:8px 2px;gap:1px;text-align:center}
+.main{padding:16px 14px 96px}.f2{grid-template-columns:1fr}.kv{grid-template-columns:1fr}}
+</style></head>
+<body>
+<div class="app">
+ <aside class="side"><div class="brand" id="brand"></div><nav class="nav" id="nav"></nav></aside>
+ <main class="main" id="main"></main>
+</div>
+<div id="modal"></div><div id="lb" onclick="this.style.display='none'"></div><div id="toast"></div><div id="printRoot"></div>
+<script>
+const $=s=>document.querySelector(s),main=$('#main');
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const today=()=>new Date().toISOString().slice(0,10);
+const fmt=d=>d?new Date(d+'T00:00').toLocaleDateString('es-NI',{day:'2-digit',month:'short',year:'numeric'}):'';
+const money=n=>n?'C$ '+Number(n).toLocaleString('es-NI'):'—';
+const TYPES=['Cámaras de seguridad','Sistema eléctrico','Alarma y control de acceso','Mantenimiento','Otro'],STAT=['Completada','En proceso','Pendiente'];
+let S={clients:[],inst:[],maint:[],cfg:{name:'Mi Empresa',logo:'',tech:'',phone:'',addr:'',techs:'',theme:'auto'}},view='dash',tmp={photos:[],qr:''};
+/* Almacenamiento local (IndexedDB) */
+const idb=()=>new Promise((ok,no)=>{const r=indexedDB.open('gestor-inst',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
+async function kvGet(k){try{const db=await idb();return await new Promise(r=>{const q=db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r()})}catch(e){}}
+async function kvSet(k,v){try{const db=await idb();db.transaction('kv','readwrite').objectStore('kv').put(v,k)}catch(e){toast('No se pudo guardar en este navegador')}}
+window.S=S;window.kvSet=kvSet;window.brand=brand;window.go=go;const save=()=>{kvSet('clients',S.clients);kvSet('inst',S.inst);kvSet('maint',S.maint);kvSet('cfg',S.cfg);if(window.firebaseSync)window.firebaseSync();};
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2400)}
+function img(f,max=1000,type='image/jpeg'){return new Promise(ok=>{const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);ok(c.toDataURL(type,.72))};i.src=r.result};r.readAsDataURL(f)})}
+const modal=(h)=>{const m=$('#modal');m.innerHTML='<div class="mb">'+h+'</div>';m.style.display='flex';m.scrollTop=0};
+const closeM=()=>$('#modal').style.display='none';
+$('#modal').addEventListener('mousedown',e=>{if(e.target.id==='modal')closeM()});
+const cname=id=>(S.clients.find(c=>c.id===id)||{}).name||'(cliente eliminado)';
+const g=id=>$('#f_'+id).value.trim();
+const confirmBtn=(label,fn)=>`<button class="btn d" onclick="if(!this.dataset.c){this.dataset.c=1;this.textContent='¿Confirmar eliminación?';return}${fn}">${label}</button>`;
+/* Navegación */
+function brand(){const c=S.cfg;$('#brand').innerHTML=(c.logo?`<img src="${c.logo}" alt="">`:`<i>${esc((c.name||'?')[0])}</i>`)+`<span>${esc(c.name)}</span>`;document.title=c.name+' – Gestión de instalaciones';
+ if(c.theme==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=c.theme}
+function nav(){$('#nav').innerHTML=[['dash','Panel','🏠'],['clients','Clientes','👥'],['inst','Instalaciones','🛠'],['maint','Mantenimiento','🗓️'],['rep','Reportes','📄'],['cfg','Configuración','⚙']].map(n=>`<button class="${view===n[0]?'on':''}" onclick="go('${n[0]}')"><span>${n[2]}</span>${n[1]}</button>`).join('')}
+function go(v){view=v;nav();({dash:Vdash,clients:Vcl,inst:Vin,maint:Vmaint,rep:Vrep,cfg:Vcfg})[v]()}
+const render=()=>go(view);
+const card=i=>`<div class="card item" onclick="instView('${i.id}')">${i.photos[0]?`<img class="thumb" src="${i.photos[0]}" alt="">`:'<div class="thumb">📷</div>'}<div><b>${esc(cname(i.client))}</b><div>${esc(i.type)} <span class="badge">${esc(i.status)}</span></div><small class="mut">${fmt(i.date)} · ${esc(i.tech||'Sin técnico')} · ${money(i.cost)}</small></div></div>`;
+/* Panel */
+function Vdash(){const m=today().slice(0,7),rec=[...S.inst].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
+ main.innerHTML=`<h1>Panel</h1><div class="stats">
+ <div class="card"><b>${S.clients.length}</b>Clientes</div><div class="card"><b>${S.inst.length}</b>Instalaciones</div>
+ <div class="card"><b>${S.inst.filter(i=>i.date.startsWith(m)).length}</b>Este mes</div>
+ <div class="card"><b>${money(S.inst.reduce((a,i)=>a+(+i.cost||0),0))}</b>Total facturado</div></div>
+ <h2>Últimas instalaciones</h2><div class="grid">${rec.map(card).join('')||'<p class="mut">Aún no hay registros. Agrega tu primer cliente para empezar.</p>'}</div>
+ <div class="acts"><button class="btn" onclick="clientForm()">Nuevo cliente</button><button class="btn g" onclick="instForm()">Nueva instalación</button></div>`}
+/* Clientes */
+function Vcl(){main.innerHTML=`<h1>Clientes</h1><div class="bar"><input id="q" placeholder="Buscar por nombre, teléfono o dirección"><button class="btn" onclick="clientForm()">Nuevo cliente</button></div><div id="list" class="grid"></div>`;$('#q').oninput=fillC;fillC()}
+function fillC(){const q=$('#q').value.toLowerCase(),l=S.clients.filter(c=>[c.name,c.phone,c.addr,c.email].join(' ').toLowerCase().includes(q));
+ $('#list').innerHTML=l.map(c=>`<div class="card item" onclick="clientView('${c.id}')"><div class="thumb">👤</div><div><b>${esc(c.name)}</b><div class="mut">${esc(c.phone||'Sin teléfono')}</div><small class="mut">${esc(c.addr)}</small><div><span class="badge">${S.inst.filter(i=>i.client===c.id).length} instalaciones</span></div></div></div>`).join('')||'<p class="mut">No hay clientes que coincidan.</p>'}
+function clientForm(id){const c=S.clients.find(x=>x.id===id)||{};modal(`<h1>${id?'Editar':'Nuevo'} cliente</h1>
+ <div class="f2"><div><label>Nombre *</label><input id="f_name" value="${esc(c.name)}"></div><div><label>Teléfono</label><input id="f_phone" value="${esc(c.phone)}"></div>
+ <div><label>Correo</label><input id="f_email" value="${esc(c.email)}"></div><div><label>Dirección</label><input id="f_addr" value="${esc(c.addr)}"></div></div>
+ <div class="f1"><label>Notas</label><textarea id="f_notes">${esc(c.notes)}</textarea></div>
+ <div class="acts"><button class="btn" onclick="saveClient('${id||''}')">Guardar cliente</button><button class="btn g" onclick="closeM()">Cancelar</button></div>`)}
+function saveClient(id){const d={name:g('name'),phone:g('phone'),email:g('email'),addr:g('addr'),notes:g('notes')};if(!d.name)return toast('Escribe el nombre del cliente');
+ if(id)Object.assign(S.clients.find(c=>c.id===id),d);else S.clients.push({id:uid(),...d});save();closeM();render();toast('Cliente guardado')}
+function clientView(id){const c=S.clients.find(x=>x.id===id),l=S.inst.filter(i=>i.client===id).sort((a,b)=>b.date.localeCompare(a.date));
+ modal(`<h1>${esc(c.name)}</h1><dl class="kv"><dt>Teléfono</dt><dd>${esc(c.phone)||'—'}</dd><dt>Correo</dt><dd>${esc(c.email)||'—'}</dd><dt>Dirección</dt><dd>${esc(c.addr)||'—'}</dd><dt>Notas</dt><dd>${esc(c.notes)||'—'}</dd></dl>
+ <h2>Historial de instalaciones</h2><div class="grid" onclick="closeM()">${l.map(card).join('')||'<p class="mut">Sin instalaciones registradas.</p>'}</div>
+ <div class="acts"><button class="btn" onclick="instForm('','${id}')">Nueva instalación</button><button class="btn g" onclick="clientForm('${id}')">Editar</button>${confirmBtn('Eliminar',`delClient('${id}')`)}<button class="btn g" onclick="closeM()">Cerrar</button></div>`)}
+function delClient(id){S.clients=S.clients.filter(c=>c.id!==id);S.inst=S.inst.filter(i=>i.client!==id);save();closeM();render();toast('Cliente eliminado')}
+/* Instalaciones */
+function Vin(){main.innerHTML=`<h1>Instalaciones e historial</h1><div class="bar"><input id="q" placeholder="Buscar cliente, equipo, red wifi, técnico, notas…">
+ <select id="ft"><option value="">Todos los tipos</option>${TYPES.map(t=>`<option>${t}</option>`).join('')}</select>
+ <select id="fs"><option value="">Todos los estados</option>${STAT.map(t=>`<option>${t}</option>`).join('')}</select>
+ <input id="fd" type="date" style="width:auto" title="Desde"><input id="fh" type="date" style="width:auto" title="Hasta">
+ <button class="btn" onclick="instForm()">Nueva instalación</button></div><div id="list" class="grid"></div>`;
+ ['q','ft','fs','fd','fh'].forEach(i=>$('#'+i).oninput=fillI);fillI()}
+function filt(q,t,s,d,h){q=(q||'').toLowerCase();return S.inst.filter(i=>(!t||i.type===t)&&(!s||i.status===s)&&(!d||i.date>=d)&&(!h||i.date<=h)&&[cname(i.client),i.type,i.tech,i.equip,i.det,i.dvr,i.wifi,i.notes].join(' ').toLowerCase().includes(q)).sort((a,b)=>b.date.localeCompare(a.date))}
+function fillI(){$('#list').innerHTML=filt($('#q').value,$('#ft').value,$('#fs').value,$('#fd').value,$('#fh').value).map(card).join('')||'<p class="mut">No se encontraron instalaciones.</p>'}
+function instForm(id,cid){if(!S.clients.length)return toast('Primero registra un cliente');
+ const i=S.inst.find(x=>x.id===id)||{client:cid||S.clients[0].id,date:today(),type:TYPES[0],status:STAT[0],tech:S.cfg.tech};tmp={photos:[...(i.photos||[])],qr:i.qr||''};
+ const t=(k,l,x='')=>`<div><label>${l}</label><input id="f_${k}" value="${esc(i[k])}" ${x}></div>`,sel=(k,l,a)=>`<div><label>${l}</label><select id="f_${k}">${a.map(o=>`<option value="${esc(o)}" ${i[k]===o?'selected':''}>${esc(o)}</option>`).join('')}</select></div>`;
+ modal(`<h1>${id?'Editar':'Nueva'} instalación</h1><div class="f2">
+ <div><label>Cliente *</label><select id="f_client">${S.clients.map(c=>`<option value="${c.id}" ${c.id===i.client?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div>
+ ${t('date','Fecha','type="date"')}${sel('type','Tipo de trabajo',TYPES)}${sel('status','Estado',STAT)}
+ ${t('tech','Técnico que atiende','list="techs"')}${t('cost','Costo (C$)','type="number" min="0"')}${t('cams','Cantidad de cámaras / puntos','type="number" min="0"')}${t('dvr','Modelo o IP del DVR/NVR')}
+ ${t('dvru','Usuario del equipo')}${t('dvrp','Contraseña del equipo')}${t('wifi','Nombre de la red wifi')}${t('wifip','Contraseña wifi')}</div>
+ <datalist id="techs">${S.cfg.techs.split('\n').filter(Boolean).map(x=>`<option value="${esc(x)}">`).join('')}</datalist>
+ <div class="f1"><label>Equipos y materiales</label><textarea id="f_equip">${esc(i.equip)}</textarea></div>
+ <div class="f1"><label>Detalles de la instalación</label><textarea id="f_det">${esc(i.det)}</textarea></div>
+ <div class="f1"><label>Notas para futuros mantenimientos</label><textarea id="f_notes">${esc(i.notes)}</textarea></div>
+ <div class="f1"><label>Fotos del trabajo terminado</label><input type="file" accept="image/*" multiple onchange="addPh(this,'photos')"><div class="ph" id="th"></div></div>
+ <div class="f1"><label>Foto del código QR de la cámara</label><input type="file" accept="image/*" onchange="addPh(this,'qr')"><div class="ph" id="qth"></div></div>
+ <div class="acts"><button class="btn" onclick="saveInst('${id||''}')">Guardar instalación</button><button class="btn g" onclick="closeM()">Cancelar</button></div>`);thumbs()}
+function thumbs(){$('#th').innerHTML=tmp.photos.map((p,k)=>`<div><img src="${p}" alt=""><b onclick="tmp.photos.splice(${k},1);thumbs()">×</b></div>`).join('');
+ $('#qth').innerHTML=tmp.qr?`<div><img src="${tmp.qr}" alt=""><b onclick="tmp.qr='';thumbs()">×</b></div>`:''}
+async function addPh(inp,k){for(const f of inp.files){const d=await img(f,k==='qr'?900:1000);k==='qr'?tmp.qr=d:tmp.photos.push(d)}inp.value='';thumbs()}
+function saveInst(id){const d={client:g('client'),date:g('date')||today(),type:g('type'),status:g('status'),tech:g('tech'),cost:g('cost'),cams:g('cams'),dvr:g('dvr'),dvru:g('dvru'),dvrp:g('dvrp'),wifi:g('wifi'),wifip:g('wifip'),equip:g('equip'),det:g('det'),notes:g('notes'),photos:tmp.photos,qr:tmp.qr};
+ if(id)Object.assign(S.inst.find(x=>x.id===id),d);else S.inst.push({id:uid(),...d});save();closeM();render();toast('Instalación guardada')}
+const sec=v=>v?`<span class="sec" data-v="${esc(v)}" onclick="if(this.dataset.on){this.textContent='••••••';this.dataset.on=''}else{this.textContent=this.dataset.v;this.dataset.on=1}">••••••</span>`:'—';
+function instView(id){const i=S.inst.find(x=>x.id===id);
+ modal(`<h1>${esc(cname(i.client))}</h1><p><span class="badge">${esc(i.type)}</span> <span class="badge">${esc(i.status)}</span></p>
+ <dl class="kv"><dt>Fecha</dt><dd>${fmt(i.date)}</dd><dt>Técnico</dt><dd>${esc(i.tech)||'—'}</dd><dt>Costo</dt><dd>${money(i.cost)}</dd><dt>Cámaras / puntos</dt><dd>${esc(i.cams)||'—'}</dd>
+ <dt>DVR/NVR</dt><dd>${esc(i.dvr)||'—'}</dd><dt>Usuario del equipo</dt><dd>${esc(i.dvru)||'—'}</dd><dt>Contraseña del equipo</dt><dd>${sec(i.dvrp)}</dd>
+ <dt>Red wifi</dt><dd>${esc(i.wifi)||'—'}</dd><dt>Contraseña wifi</dt><dd>${sec(i.wifip)}</dd><dt>Equipos y materiales</dt><dd>${esc(i.equip)||'—'}</dd><dt>Detalles</dt><dd>${esc(i.det)||'—'}</dd><dt>Notas de mantenimiento</dt><dd>${esc(i.notes)||'—'}</dd></dl>
+ ${i.photos.length?`<h2>Fotos del trabajo</h2><div class="ph">${i.photos.map((p,k)=>`<div><img src="${p}" alt="" onclick="showPh('${id}',${k})"></div>`).join('')}</div>`:''}
+ ${i.qr?`<h2>Código QR de la cámara</h2><div class="ph"><div><img src="${i.qr}" alt="" onclick="showPh('${id}',-1)"></div></div>`:''}
+ <div class="acts"><button class="btn" onclick="instForm('${id}')">Editar</button><button class="btn g" onclick="doPrint(repHTML([S.inst.find(x=>x.id==='${id}')],{detail:1,photos:1,creds:$('#inc').checked},'Ficha de instalación'))">Imprimir ficha</button>
+ <label style="display:flex;gap:6px;align-items:center;margin:0"><input id="inc" type="checkbox" style="width:auto">con contraseñas</label>${confirmBtn('Eliminar',`delInst('${id}')`)}<button class="btn g" onclick="closeM()">Cerrar</button></div>`)}
+function showPh(id,k){const i=S.inst.find(x=>x.id===id);$('#lb').innerHTML=`<img src="${k<0?i.qr:i.photos[k]}" alt="">`;$('#lb').style.display='flex'}
+function delInst(id){S.inst=S.inst.filter(i=>i.id!==id);save();closeM();render();toast('Instalación eliminada')}
+/* Mantenimiento preventivo y recordatorios */
+function maintCard(x){
+ const late=x.status!=='Completado'&&x.date<today(), due=x.status!=='Completado'&&x.date===today();
+ return `<div class="card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:start"><b>${esc(x.title||'Mantenimiento')}</b><span class="badge" style="${late?'background:#fee2e2;color:#b91c1c':due?'background:#fef3c7;color:#92400e':''}">${late?'Vencido':due?'Hoy':esc(x.status||'Programado')}</span></div>
+ <div class="mut" style="margin-top:6px">${esc(cname(x.client))} · ${esc(x.type||'Servicio')}</div>
+ <div style="margin-top:6px"><b>Fecha:</b> ${fmt(x.date)} · <b>Técnico:</b> ${esc(x.tech||'Sin asignar')}</div>
+ ${x.notes?`<p class="mut">${esc(x.notes)}</p>`:''}
+ <div class="acts"><button class="btn" onclick="completeMaint('${x.id}')">${x.status==='Completado'?'Completado':'Marcar completado'}</button><button class="btn g" onclick="maintForm('${x.id}')">Editar</button><button class="btn d" onclick="delMaint('${x.id}')">Eliminar</button></div></div>`;
+}
+function Vmaint(){
+ main.innerHTML=`<h1>Mantenimiento y recordatorios</h1>
+ <p class="mut">Programa visitas preventivas y consulta los trabajos vencidos o próximos.</p>
+ <div class="stats"><div class="card"><b>${S.maint.filter(x=>x.status!=='Completado').length}</b>Programados</div><div class="card"><b>${S.maint.filter(x=>x.status!=='Completado'&&x.date<today()).length}</b>Vencidos</div><div class="card"><b>${S.maint.filter(x=>x.status==='Completado').length}</b>Completados</div></div>
+ <div class="bar" style="margin-top:16px"><input id="mq" placeholder="Buscar mantenimiento, cliente o técnico"><select id="mf"><option value="">Todos los estados</option><option>Programado</option><option>Completado</option></select><button class="btn" onclick="maintForm()">＋ Programar mantenimiento</button></div>
+ <div id="mlist" class="grid"></div>`;
+ $('#mq').oninput=fillM;$('#mf').onchange=fillM;fillM();
+}
+function fillM(){const q=($('#mq')?.value||'').toLowerCase(),st=$('#mf')?.value||'';
+ const a=S.maint.filter(x=>(!st||x.status===st)&&[x.title,x.type,x.tech,x.notes,cname(x.client)].join(' ').toLowerCase().includes(q)).sort((a,b)=>a.date.localeCompare(b.date));
+ $('#mlist').innerHTML=a.map(maintCard).join('')||'<p class="mut">No hay recordatorios que coincidan. Programa el mantenimiento de un equipo para empezar.</p>';
+}
+function maintForm(id){
+ if(!S.clients.length)return toast('Primero registra un cliente');
+ const x=S.maint.find(a=>a.id===id)||{client:S.clients[0].id,date:today(),status:'Programado',type:'Mantenimiento preventivo',tech:S.cfg.tech,repeat:'Sin repetición'};
+ const field=(k,l,type='text')=>`<div><label>${l}</label><input id="m_${k}" type="${type}" value="${esc(x[k]||'')}"></div>`;
+ modal(`<h1>${id?'Editar':'Programar'} mantenimiento</h1><div class="f2">
+ <div><label>Cliente *</label><select id="m_client">${S.clients.map(c=>`<option value="${c.id}" ${c.id===x.client?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div>
+ ${field('title','Título del recordatorio','text')}${field('date','Fecha programada','date')}
+ <div><label>Tipo</label><select id="m_type">${['Mantenimiento preventivo','Mantenimiento correctivo','Revisión','Garantía','Otro'].map(v=>`<option ${x.type===v?'selected':''}>${v}</option>`).join('')}</select></div>
+ ${field('tech','Técnico responsable','text')}
+ <div><label>Repetición</label><select id="m_repeat">${['Sin repetición','Mensual','Cada 3 meses','Cada 6 meses','Anual'].map(v=>`<option ${x.repeat===v?'selected':''}>${v}</option>`).join('')}</select></div>
+ </div><div class="f1"><label>Notas / tareas que deben revisarse</label><textarea id="m_notes">${esc(x.notes||'')}</textarea></div>
+ <div class="acts"><button class="btn" onclick="saveMaint('${id||''}')">Guardar recordatorio</button><button class="btn g" onclick="closeM()">Cancelar</button></div>`);
+}
+function saveMaint(id){
+ const d={client:$('#m_client').value,title:$('#m_title').value.trim()||'Mantenimiento programado',date:$('#m_date').value||today(),type:$('#m_type').value,tech:$('#m_tech').value.trim(),repeat:$('#m_repeat').value,notes:$('#m_notes').value.trim()};
+ if(id)Object.assign(S.maint.find(x=>x.id===id),d);else S.maint.push({id:uid(),...d,status:'Programado',createdAt:today()});
+ save();closeM();render();toast('Recordatorio guardado');
+}
+function completeMaint(id){
+ const x=S.maint.find(a=>a.id===id);if(!x)return;
+ x.status='Completado';x.completedAt=today();
+ if(x.repeat&&x.repeat!=='Sin repetición'){
+  const d=new Date(x.date+'T12:00:00'),months={'Mensual':1,'Cada 3 meses':3,'Cada 6 meses':6,'Anual':12}[x.repeat]||0;
+  if(months){d.setMonth(d.getMonth()+months);S.maint.push({...x,id:uid(),date:d.toISOString().slice(0,10),status:'Programado',completedAt:'',createdAt:today()});}
+ }
+ save();render();toast('Mantenimiento marcado como completado');
+}
+function delMaint(id){S.maint=S.maint.filter(x=>x.id!==id);save();render();toast('Recordatorio eliminado')}
+/* Reportes */
+function Vrep(){main.innerHTML=`<h1>Reportes</h1><div class="card"><div class="f2">
+ <div><label>Cliente</label><select id="r_c"><option value="">Todos los clientes</option>${S.clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div>
+ <div><label>Tipo</label><select id="r_t"><option value="">Todos</option>${TYPES.map(t=>`<option>${t}</option>`).join('')}</select></div>
+ <div><label>Desde</label><input id="r_d" type="date"></div><div><label>Hasta</label><input id="r_h" type="date"></div></div>
+ <div class="acts"><label><input id="r_det" type="checkbox" style="width:auto" checked> Detalle completo</label><label><input id="r_ph" type="checkbox" style="width:auto"> Fotos</label><label><input id="r_cr" type="checkbox" style="width:auto"> Contraseñas</label></div>
+ <div class="acts"><button class="btn" onclick="genRep()">Generar reporte</button><button class="btn g" onclick="doPrint($('#repOut').innerHTML)">Imprimir o guardar PDF</button></div></div><div id="repOut" style="margin-top:16px"></div>`}
+function genRep(){const cl=$('#r_c').value,l=filt('',$('#r_t').value,'',$('#r_d').value,$('#r_h').value).filter(i=>!cl||i.client===cl);
+ $('#repOut').innerHTML=repHTML(l,{detail:$('#r_det').checked,photos:$('#r_ph').checked,creds:$('#r_cr').checked},cl?'Reporte de instalaciones: '+cname(cl):'Reporte general de instalaciones')}
+function repHTML(l,o,title){const c=S.cfg,sum=l.reduce((a,i)=>a+(+i.cost||0),0),r=(k,v)=>v?`<div><b>${k}:</b> ${esc(v)}</div>`:'';
+ return `<div class="rp"><div class="rh">${c.logo?`<img src="${c.logo}" alt="">`:''}<div><h2>${esc(c.name)}</h2><small>${esc(c.phone)} ${esc(c.addr)}</small></div></div>
+ <h3>${esc(title)}</h3><p>Generado el ${fmt(today())}. Registros: ${l.length}. Total: ${money(sum)}</p>
+ <table><tr><th>Fecha</th><th>Cliente</th><th>Tipo</th><th>Técnico</th><th>Estado</th><th>Costo</th></tr>${l.map(i=>`<tr><td>${fmt(i.date)}</td><td>${esc(cname(i.client))}</td><td>${esc(i.type)}</td><td>${esc(i.tech)}</td><td>${esc(i.status)}</td><td>${money(i.cost)}</td></tr>`).join('')||'<tr><td colspan="6">Sin registros para estos filtros.</td></tr>'}</table>
+ ${o.detail?l.map(i=>`<div class="blk"><b>${esc(cname(i.client))}</b> · ${esc(i.type)} · ${fmt(i.date)}${r('Cámaras / puntos',i.cams)}${r('DVR/NVR',i.dvr)}${r('Red wifi',i.wifi)}${r('Equipos y materiales',i.equip)}${r('Detalles',i.det)}${r('Notas de mantenimiento',i.notes)}
+ ${o.creds?r('Usuario del equipo',i.dvru)+r('Contraseña del equipo',i.dvrp)+r('Contraseña wifi',i.wifip):''}
+ ${o.photos?`<div class="ph">${i.photos.map(p=>`<img src="${p}" alt="">`).join('')}${i.qr?`<img src="${i.qr}" alt="">`:''}</div>`:''}</div>`).join(''):''}</div>`}
+function doPrint(h){$('#printRoot').innerHTML=h;document.body.classList.add('printing');window.print();setTimeout(()=>document.body.classList.remove('printing'),800)}
+window.onafterprint=()=>document.body.classList.remove('printing');
+/* Configuración */
+function Vcfg(){const c=S.cfg,t=(k,l)=>`<div><label>${l}</label><input id="f_${k}" value="${esc(c[k])}"></div>`;
+ main.innerHTML=`<h1>Configuración</h1>
+ <div class="card" style="margin-bottom:14px"><h2 style="margin-top:0">☁️ Cuenta y sincronización Firebase</h2>
+ <p id="fbState" class="mut">Inicializando conexión…</p>
+ <div class="f2"><div><label>Correo electrónico</label><input id="fbEmail" type="email" autocomplete="username" placeholder="tu@empresa.com"></div><div><label>Contraseña</label><input id="fbPass" type="password" autocomplete="current-password" placeholder="Mínimo 6 caracteres"></div></div>
+ <div class="acts"><button class="btn" onclick="fbRegister()">Crear cuenta</button><button class="btn g" onclick="fbLogin()">Iniciar sesión</button><button class="btn g" onclick="fbLogout()">Cerrar sesión</button><button class="btn d" onclick="fbSyncNow()">Sincronizar ahora</button></div>
+ <p class="mut" style="font-size:12px">Los registros se sincronizan por cuenta. Para activar el acceso seguro, publica las reglas de Firebase incluidas con la aplicación. No compartas tu contraseña.</p></div>
+ <div class="card"><div class="f2">${t('name','Nombre de la empresa')}${t('tech','Técnico que atiende (por defecto)')}${t('phone','Teléfono')}${t('addr','Dirección')}</div>
+ <div class="f1"><label>Técnicos disponibles (uno por línea)</label><textarea id="f_techs">${esc(c.techs)}</textarea></div>
+ <div class="f2"><div><label>Logotipo</label><input type="file" accept="image/*" onchange="setLogo(this)">${c.logo?`<div class="ph"><div><img src="${c.logo}" alt=""><b onclick="S.cfg.logo='';save();brand();Vcfg()">×</b></div></div>`:''}</div>
+ <div><label>Apariencia</label><select id="f_theme">${[['auto','Automática'],['light','Clara'],['dark','Oscura']].map(o=>`<option value="${o[0]}" ${c.theme===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div></div>
+ <div class="acts"><button class="btn" onclick="saveCfg()">Guardar configuración</button></div></div>
+ <p class="mut">Los datos también se conservan localmente en este navegador. Con una sesión iniciada, clientes, instalaciones, mantenimientos y configuración se sincronizan con Firebase.</p>`;if(window.firebaseRefreshStatus)window.firebaseRefreshStatus();}
+async function setLogo(i){S.cfg.logo=await img(i.files[0],300,'image/png');save();brand();Vcfg()}
+function saveCfg(){Object.assign(S.cfg,{name:g('name')||'Mi Empresa',tech:g('tech'),phone:g('phone'),addr:g('addr'),techs:$('#f_techs').value,theme:g('theme')});save();brand();toast('Configuración guardada')}
+window.localReady=(async()=>{const[c,i,m,f]=await Promise.all([kvGet('clients'),kvGet('inst'),kvGet('maint'),kvGet('cfg')]);if(c)S.clients=c;if(i)S.inst=i;if(m)S.maint=m;if(f)Object.assign(S.cfg,f);brand();go('dash')})();
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
+
+const firebaseConfig = {
+ apiKey: "AIzaSyBeKavL60ijrFjfSUAtCQZeaa4eJKe1hlM",
+ authDomain: "electronnicaragua-6b4fc.firebaseapp.com",
+ projectId: "electronnicaragua-6b4fc",
+ storageBucket: "electronnicaragua-6b4fc.firebasestorage.app",
+ messagingSenderId: "278242117137",
+ appId: "1:278242117137:web:8935e05f8c6066d59053b0",
+ measurementId: "G-EHYZM76YZD"
+};
+const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getFirestore(app), storage=getStorage(app);
+let currentUser=null, busy=false, queued=false, loadingRemote=false;
+const status=(msg)=>{const e=document.querySelector('#fbState');if(e)e.textContent=msg;};
+window.firebaseRefreshStatus=()=>status(currentUser?`Sesión iniciada: ${currentUser.email}. Sincronización en la nube disponible.`:'No has iniciado sesión. Los cambios se guardan solo en este dispositivo hasta iniciar sesión.');
+function safeId(id){return String(id).replace(/[^a-zA-Z0-9_-]/g,'_')||'record';}
+async function cloudImage(data, path){
+ if(typeof data!=='string'||!data.startsWith('data:'))return data||'';
+ const r=ref(storage,`users/${currentUser.uid}/media/${path}`);
+ await uploadString(r,data,'data_url');
+ return await getDownloadURL(r);
+}
+async function cloudRecord(kind, item){
+ const out={...item};
+ if(kind==='inst'){
+  if(Array.isArray(out.photos))out.photos=await Promise.all(out.photos.map((p,i)=>cloudImage(p,`inst_${safeId(item.id)}_photo_${i}`)));
+  if(out.qr)out.qr=await cloudImage(out.qr,`inst_${safeId(item.id)}_qr`);
+ }
+ if(kind==='cfg'&&out.logo)out.logo=await cloudImage(out.logo,'company_logo');
+ return out;
+}
+async function readCollection(kind){const snap=await getDocs(collection(db,'users',currentUser.uid,kind));return snap.docs.map(d=>({id:d.id,...d.data()}));}
+async function writeCollection(kind, items){
+ const existing=await getDocs(collection(db,'users',currentUser.uid,kind));
+ const ids=new Set(items.map(x=>String(x.id)));
+ for(const d of existing.docs)if(!ids.has(d.id))await deleteDoc(d.ref);
+ for(const item of items){const payload=await cloudRecord(kind,item);Object.assign(item,payload);await setDoc(doc(db,'users',currentUser.uid,kind,String(item.id)),payload);}
+}
+async function writeConfig(){const payload=await cloudRecord('cfg',{id:'main',...window.S.cfg});Object.assign(window.S.cfg,payload);await setDoc(doc(db,'users',currentUser.uid,'cfg','main'),payload);}
+async function syncAll(){
+ if(!currentUser||loadingRemote)return;
+ if(busy){queued=true;return;}
+ busy=true;status('Sincronizando datos y archivos…');
+ try{
+  await writeCollection('clients',window.S.clients);await writeCollection('inst',window.S.inst);await writeCollection('maint',window.S.maint);await writeConfig();
+  await Promise.all([window.kvSet('clients',window.S.clients),window.kvSet('inst',window.S.inst),window.kvSet('maint',window.S.maint),window.kvSet('cfg',window.S.cfg)]);
+  status(`Sincronizado con Firebase · ${new Date().toLocaleTimeString('es-NI',{hour:'2-digit',minute:'2-digit'})}`);
+ }catch(e){console.error(e);status('No se pudo sincronizar: '+(e.code||e.message||'revisa la configuración y las reglas de Firebase'));}
+ finally{busy=false;if(queued){queued=false;syncAll();}}
+}
+window.firebaseSync=()=>{if(currentUser&&!loadingRemote)syncAll();};
+window.fbSyncNow=()=>{if(!currentUser){status('Inicia sesión primero para sincronizar.');return;}syncAll();};
+window.fbRegister=async()=>{try{const email=document.querySelector('#fbEmail')?.value.trim(),pass=document.querySelector('#fbPass')?.value;if(!email||!pass)throw new Error('Escribe correo y contraseña.');if(pass.length<6)throw new Error('La contraseña debe tener al menos 6 caracteres.');await createUserWithEmailAndPassword(auth,email,pass);status('Cuenta creada. Cargando tus datos…');}catch(e){status(authError(e));}};
+window.fbLogin=async()=>{try{const email=document.querySelector('#fbEmail')?.value.trim(),pass=document.querySelector('#fbPass')?.value;if(!email||!pass)throw new Error('Escribe correo y contraseña.');await signInWithEmailAndPassword(auth,email,pass);}catch(e){status(authError(e));}};
+window.fbLogout=async()=>{try{await signOut(auth);status('Sesión cerrada. Los datos locales permanecen en este dispositivo.');}catch(e){status(authError(e));}};
+function authError(e){const map={'auth/invalid-email':'El correo no tiene un formato válido.','auth/invalid-credential':'Correo o contraseña incorrectos.','auth/email-already-in-use':'Ese correo ya tiene una cuenta.','auth/weak-password':'La contraseña es demasiado débil.','auth/operation-not-allowed':'Activa el proveedor Correo/contraseña en Firebase Authentication.','auth/network-request-failed':'Error de conexión. Revisa Internet.'};return map[e.code]||e.message||'Error de autenticación.';}
+onAuthStateChanged(auth,async user=>{
+ currentUser=user;window.firebaseRefreshStatus?.();
+ if(!user)return;
+ loadingRemote=true;status('Cargando datos de la nube…');
+ try{
+  await window.localReady;
+  const [clients,inst,maint,cfgSnap]=await Promise.all([readCollection('clients'),readCollection('inst'),readCollection('maint'),getDocs(collection(db,'users',user.uid,'cfg'))]);
+  const cfg=cfgSnap.docs.find(d=>d.id==='main')?.data();
+  // Fusiona por ID: la nube prevalece en registros repetidos y se conservan registros locales exclusivos.
+  const merge=(local,remote)=>{const m=new Map((local||[]).map(x=>[String(x.id),x]));for(const x of remote)m.set(String(x.id),x);return [...m.values()];};
+  window.S.clients=merge(window.S.clients,clients);window.S.inst=merge(window.S.inst,inst);window.S.maint=merge(window.S.maint,maint);
+  if(cfg){const {id,...rest}=cfg;Object.assign(window.S.cfg,rest);}
+  await Promise.all([window.kvSet('clients',window.S.clients),window.kvSet('inst',window.S.inst),window.kvSet('maint',window.S.maint),window.kvSet('cfg',window.S.cfg)]);
+  loadingRemote=false;await syncAll();window.brand();window.go(window.view);status(`Sesión iniciada: ${user.email}. Datos sincronizados.`);
+ }catch(e){loadingRemote=false;console.error(e);status('Error al cargar Firebase: '+(e.code||e.message||'comprueba las reglas'));}
+});
+</script></body></html>
