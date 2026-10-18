@@ -111,6 +111,11 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
 #loginMessage{min-height:22px;margin:15px 0 0;color:var(--mut);font-size:13px}
 #loginMessage[data-error="true"]{color:var(--dan)}
 .login-secure{margin:23px 0 0;padding-top:17px;border-top:1px solid var(--bd);color:var(--mut);font-size:11px;text-align:center}
+.readonly-banner{padding:10px 13px;border:1px solid var(--bd);border-radius:9px;background:var(--pri2);color:var(--pri)}
+.account-access-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(145px,200px) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd)}
+.account-access-row:last-child{border-bottom:0}
+.account-access-row strong,.account-access-row small{display:block;overflow-wrap:anywhere}
+.account-access-row small{color:var(--mut);font-size:12px}
 @keyframes login-rise{from{opacity:0;transform:translateY(16px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes login-fade{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
 @keyframes orbit{to{transform:rotate(360deg)}}
@@ -160,7 +165,7 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
     </div>
    </form>
    <p id="loginMessage" role="status" aria-live="polite">Verificando conexión…</p>
-   <p class="login-secure">🔒 Acceso seguro. Tus datos se sincronizan con tu cuenta.</p>
+   <p class="login-secure">🔒 Las cuentas nuevas comienzan con acceso de solo lectura. El administrador puede habilitar la edición.</p>
   </div>
  </div>
 </section>
@@ -201,7 +206,7 @@ async function kvSet(k,v){try{const db=await idb();db.transaction('kv','readwrit
 window.S=S;window.kvSet=kvSet;window.brand=brand;window.go=go;const save=()=>{kvSet('clients',S.clients);kvSet('inst',S.inst);kvSet('maint',S.maint);kvSet('cfg',S.cfg);if(window.cloudSync)window.cloudSync();};
 function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2400)}
 function img(f,max=1000,type='image/jpeg'){return new Promise(ok=>{const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);ok(c.toDataURL(type,.72))};i.src=r.result};r.readAsDataURL(f)})}
-const modal=(h)=>{const m=$('#modal');m.innerHTML='<div class="mb">'+h+'</div>';m.style.display='flex';m.scrollTop=0};
+const modal=(h)=>{const m=$('#modal');m.innerHTML='<div class="mb">'+h+'</div>';m.style.display='flex';m.scrollTop=0;window.applyAccessMode?.()};
 const closeM=()=>$('#modal').style.display='none';
 $('#modal').addEventListener('mousedown',e=>{if(e.target.id==='modal')closeM()});
 const cname=id=>(S.clients.find(c=>c.id===id)||{}).name||'(cliente eliminado)';
@@ -259,7 +264,7 @@ function closeNavMenu(){
  button.setAttribute('aria-expanded','false');button.setAttribute('aria-label','Abrir menú');
  document.body.style.overflow='';
 }
-function go(v){view=v;nav();({dash:Vdash,clients:Vcl,inst:Vin,maint:Vmaint,rep:Vrep,cfg:Vcfg})[v]();closeNavMenu()}
+function go(v){view=v;nav();({dash:Vdash,clients:Vcl,inst:Vin,maint:Vmaint,rep:Vrep,cfg:Vcfg})[v]();closeNavMenu();window.applyAccessMode?.()}
 document.addEventListener('keydown',event=>{if(event.key==='Escape')closeNavMenu();});
 window.addEventListener('resize',()=>{if(window.innerWidth>760)closeNavMenu();});
 const render=()=>go(view);
@@ -281,13 +286,13 @@ function clientForm(id){const c=S.clients.find(x=>x.id===id)||{};modal(`<h1>${id
  <div><label>Correo</label><input id="f_email" value="${esc(c.email)}"></div><div><label>Dirección</label><input id="f_addr" value="${esc(c.addr)}"></div></div>
  <div class="f1"><label>Notas</label><textarea id="f_notes">${esc(c.notes)}</textarea></div>
  <div class="acts"><button class="btn" onclick="saveClient('${id||''}')">Guardar cliente</button><button class="btn g" onclick="closeM()">Cancelar</button></div>`)}
-function saveClient(id){const d={name:g('name'),phone:g('phone'),email:g('email'),addr:g('addr'),notes:g('notes')};if(!d.name)return toast('Escribe el nombre del cliente');
+function saveClient(id){if(!window.ensureWritable())return;const d={name:g('name'),phone:g('phone'),email:g('email'),addr:g('addr'),notes:g('notes')};if(!d.name)return toast('Escribe el nombre del cliente');
  if(id)Object.assign(S.clients.find(c=>c.id===id),d);else S.clients.push({id:uid(),...d});save();closeM();render();toast('Cliente guardado')}
 function clientView(id){const c=S.clients.find(x=>x.id===id),l=S.inst.filter(i=>i.client===id).sort((a,b)=>b.date.localeCompare(a.date));
  modal(`<h1>${esc(c.name)}</h1><dl class="kv"><dt>Teléfono</dt><dd>${esc(c.phone)||'—'}</dd><dt>Correo</dt><dd>${esc(c.email)||'—'}</dd><dt>Dirección</dt><dd>${esc(c.addr)||'—'}</dd><dt>Notas</dt><dd>${esc(c.notes)||'—'}</dd></dl>
  <h2>Historial de instalaciones</h2><div class="grid" onclick="closeM()">${l.map(card).join('')||'<p class="mut">Sin instalaciones registradas.</p>'}</div>
  <div class="acts"><button class="btn" onclick="instForm('','${id}')">Nueva instalación</button><button class="btn g" onclick="clientForm('${id}')">Editar</button>${confirmBtn('Eliminar',`delClient('${id}')`)}<button class="btn g" onclick="closeM()">Cerrar</button></div>`)}
-function delClient(id){S.clients=S.clients.filter(c=>c.id!==id);S.inst=S.inst.filter(i=>i.client!==id);save();closeM();render();toast('Cliente eliminado')}
+function delClient(id){if(!window.ensureWritable())return;S.clients=S.clients.filter(c=>c.id!==id);S.inst=S.inst.filter(i=>i.client!==id);save();closeM();render();toast('Cliente eliminado')}
 /* Instalaciones */
 function Vin(){main.innerHTML=`<h1>Instalaciones e historial</h1><div class="bar"><input id="q" placeholder="Buscar cliente, equipo, red wifi, técnico, notas…">
  <select id="ft"><option value="">Todos los tipos</option>${TYPES.map(t=>`<option>${t}</option>`).join('')}</select>
@@ -315,7 +320,7 @@ function instForm(id,cid){if(!S.clients.length)return toast('Primero registra un
 function thumbs(){$('#th').innerHTML=tmp.photos.map((p,k)=>`<div><img src="${p}" alt=""><b onclick="tmp.photos.splice(${k},1);thumbs()">×</b></div>`).join('');
  $('#qth').innerHTML=tmp.qr?`<div><img src="${tmp.qr}" alt=""><b onclick="tmp.qr='';thumbs()">×</b></div>`:''}
 async function addPh(inp,k){for(const f of inp.files){const d=await img(f,k==='qr'?900:1000);k==='qr'?tmp.qr=d:tmp.photos.push(d)}inp.value='';thumbs()}
-function saveInst(id){const d={client:g('client'),date:g('date')||today(),type:g('type'),status:g('status'),tech:g('tech'),cost:g('cost'),cams:g('cams'),dvr:g('dvr'),dvru:g('dvru'),dvrp:g('dvrp'),wifi:g('wifi'),wifip:g('wifip'),equip:g('equip'),det:g('det'),notes:g('notes'),photos:tmp.photos,qr:tmp.qr};
+function saveInst(id){if(!window.ensureWritable())return;const d={client:g('client'),date:g('date')||today(),type:g('type'),status:g('status'),tech:g('tech'),cost:g('cost'),cams:g('cams'),dvr:g('dvr'),dvru:g('dvru'),dvrp:g('dvrp'),wifi:g('wifi'),wifip:g('wifip'),equip:g('equip'),det:g('det'),notes:g('notes'),photos:tmp.photos,qr:tmp.qr};
  if(id)Object.assign(S.inst.find(x=>x.id===id),d);else S.inst.push({id:uid(),...d});save();closeM();render();toast('Instalación guardada')}
 const sec=v=>v?`<span class="sec" data-v="${esc(v)}" onclick="if(this.dataset.on){this.textContent='••••••';this.dataset.on=''}else{this.textContent=this.dataset.v;this.dataset.on=1}">••••••</span>`:'—';
 function instView(id){const i=S.inst.find(x=>x.id===id);
@@ -328,7 +333,7 @@ function instView(id){const i=S.inst.find(x=>x.id===id);
  <div class="acts"><button class="btn" onclick="instForm('${id}')">Editar</button><button class="btn g" onclick="doPrint(repHTML([S.inst.find(x=>x.id==='${id}')],{detail:1,photos:1,creds:$('#inc').checked},'Ficha de instalación'))">Imprimir ficha</button>
  <label style="display:flex;gap:6px;align-items:center;margin:0"><input id="inc" type="checkbox" style="width:auto">con contraseñas</label>${confirmBtn('Eliminar',`delInst('${id}')`)}<button class="btn g" onclick="closeM()">Cerrar</button></div>`)}
 function showPh(id,k){const i=S.inst.find(x=>x.id===id);$('#lb').innerHTML=`<img src="${k<0?i.qr:i.photos[k]}" alt="">`;$('#lb').style.display='flex'}
-function delInst(id){S.inst=S.inst.filter(i=>i.id!==id);save();closeM();render();toast('Instalación eliminada')}
+function delInst(id){if(!window.ensureWritable())return;S.inst=S.inst.filter(i=>i.id!==id);save();closeM();render();toast('Instalación eliminada')}
 /* Mantenimiento preventivo y recordatorios */
 function maintCard(x){
  const late=x.status!=='Completado'&&x.date<today(), due=x.status!=='Completado'&&x.date===today();
@@ -364,11 +369,13 @@ function maintForm(id){
  <div class="acts"><button class="btn" onclick="saveMaint('${id||''}')">Guardar recordatorio</button><button class="btn g" onclick="closeM()">Cancelar</button></div>`);
 }
 function saveMaint(id){
+ if(!window.ensureWritable())return;
  const d={client:$('#m_client').value,title:$('#m_title').value.trim()||'Mantenimiento programado',date:$('#m_date').value||today(),type:$('#m_type').value,tech:$('#m_tech').value.trim(),repeat:$('#m_repeat').value,notes:$('#m_notes').value.trim()};
  if(id)Object.assign(S.maint.find(x=>x.id===id),d);else S.maint.push({id:uid(),...d,status:'Programado',createdAt:today()});
  save();closeM();render();toast('Recordatorio guardado');
 }
 function completeMaint(id){
+ if(!window.ensureWritable())return;
  const x=S.maint.find(a=>a.id===id);if(!x)return;
  x.status='Completado';x.completedAt=today();
  if(x.repeat&&x.repeat!=='Sin repetición'){
@@ -377,7 +384,7 @@ function completeMaint(id){
  }
  save();render();toast('Mantenimiento marcado como completado');
 }
-function delMaint(id){S.maint=S.maint.filter(x=>x.id!==id);save();render();toast('Recordatorio eliminado')}
+function delMaint(id){if(!window.ensureWritable())return;S.maint=S.maint.filter(x=>x.id!==id);save();render();toast('Recordatorio eliminado')}
 /* Reportes */
 function Vrep(){main.innerHTML=`<h1>Reportes</h1><div class="card"><div class="f2">
  <div><label>Cliente</label><select id="r_c"><option value="">Todos los clientes</option>${S.clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div>
@@ -402,15 +409,16 @@ function Vcfg(){const c=S.cfg,t=(k,l)=>`<div><label>${l}</label><input id="f_${k
  <div class="card" style="margin-bottom:14px"><h2 style="margin-top:0">☁️ Cuenta y sincronización Supabase</h2>
  <p id="cloudState" class="mut">Conectando con Supabase…</p>
  <div class="acts"><button class="btn g" onclick="sbLogout()">Cerrar sesión</button><button class="btn d" onclick="cloudSyncNow()">Sincronizar ahora</button></div>
- <p class="mut" style="font-size:12px">Tus registros y archivos se sincronizan de forma privada con tu cuenta de Supabase. Las tablas, políticas de acceso y almacenamiento se configuran con el archivo <code>supabase-schema.sql</code>.</p></div>
+ <p class="mut" style="font-size:12px">Tus registros y archivos se sincronizan con la cuenta administradora. Las tablas, políticas y permisos se configuran ejecutando <code>supabase-schema.sql</code> en Supabase.</p></div>
+ ${window.accountIsAdmin?'<div class="card" style="margin-bottom:14px"><h2 style="margin-top:0">Acceso de las cuentas</h2><p class="mut">Las cuentas nuevas comienzan con acceso de solo lectura. Puedes cambiar el permiso de cada cuenta aquí.</p><div id="accountAccessList" class="mut">Cargando cuentas…</div></div>':''}
  <div class="card"><div class="f2">${t('name','Nombre de la empresa')}${t('tech','Técnico que atiende (por defecto)')}${t('phone','Teléfono')}${t('addr','Dirección')}</div>
  <div class="f1"><label>Técnicos disponibles (uno por línea)</label><textarea id="f_techs">${esc(c.techs)}</textarea></div>
  <div class="f2"><div><label>Logotipo</label><input type="file" accept="image/*" onchange="setLogo(this)">${c.logo?`<div class="ph"><div><img src="${c.logo}" alt=""><b onclick="S.cfg.logo='';save();brand();Vcfg()">×</b></div></div>`:''}</div>
  <div><label>Apariencia</label><select id="f_theme">${[['auto','Automática'],['light','Clara'],['dark','Oscura']].map(o=>`<option value="${o[0]}" ${c.theme===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div></div>
  <div class="acts"><button class="btn" onclick="saveCfg()">Guardar configuración</button></div></div>
- <p class="mut">Los datos también se conservan localmente en este navegador. Con una sesión iniciada, clientes, instalaciones, mantenimientos, configuración y fotos se sincronizan con Supabase.</p>`;if(window.cloudRefreshStatus)window.cloudRefreshStatus();}
-async function setLogo(i){S.cfg.logo=await img(i.files[0],300,'image/png');save();brand();Vcfg()}
-function saveCfg(){Object.assign(S.cfg,{name:g('name')||'Mi Empresa',tech:g('tech'),phone:g('phone'),addr:g('addr'),techs:$('#f_techs').value,theme:g('theme')});save();brand();toast('Configuración guardada')}
+ <p class="mut">Los datos también se conservan localmente en este navegador. Con una sesión iniciada, clientes, instalaciones, mantenimientos, configuración y fotos se sincronizan con Supabase.</p>`;if(window.cloudRefreshStatus)window.cloudRefreshStatus();if(window.accountIsAdmin)window.loadAccountAccess?.();}
+async function setLogo(i){if(!window.ensureWritable())return;S.cfg.logo=await img(i.files[0],300,'image/png');save();brand();Vcfg()}
+function saveCfg(){if(!window.ensureWritable())return;Object.assign(S.cfg,{name:g('name')||'Mi Empresa',tech:g('tech'),phone:g('phone'),addr:g('addr'),techs:$('#f_techs').value,theme:g('theme')});save();brand();toast('Configuración guardada')}
 window.localReady=(async()=>{const[c,i,m,f]=await Promise.all([kvGet('clients'),kvGet('inst'),kvGet('maint'),kvGet('cfg')]);if(c)S.clients=c;if(i)S.inst=i;if(m)S.maint=m;if(f)Object.assign(S.cfg,f);brand()})();
 </script>
 <script type="module">
@@ -421,11 +429,27 @@ const SUPABASE_PUBLISHABLE_KEY="sb_publishable_zsf9J37i-yLO6hCoZy_UGg_JNM2b4Iw";
 const STORAGE_BUCKET="gestor-inst-media", STORAGE_PREFIX="sb-storage:";
 const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 let currentUser=null, busy=false, queued=false, loadingRemote=false, loadedUserId='', loadingUserId='', authLoadSequence=0;
+let dataOwnerId='',canWriteData=false,isAdmin=false;
 const signedAssetPaths=new Map();
+const escapeHtml=value=>String(value==null?'':value).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const status=(msg)=>{const e=document.querySelector('#cloudState');if(e)e.textContent=msg;const login=document.querySelector('#loginMessage');if(login){login.textContent=msg;login.dataset.error=/error|incorrect|inválido|activa|cerró|bloqueó|autorizado|configura|no se pudo/i.test(msg);}};
 function showLogin(){document.querySelector('#appShell').hidden=true;document.querySelector('#loginScreen').hidden=false;}
 function showApp(){document.querySelector('#loginScreen').hidden=true;document.querySelector('#appShell').hidden=false;}
-window.cloudRefreshStatus=()=>status(currentUser?`Sesión iniciada: ${currentUser.email}. Sincronización con Supabase activa.`:'No has iniciado sesión.');
+window.ensureWritable=()=>{if(canWriteData)return true;toast('Tu cuenta tiene acceso de solo lectura.');return false;};
+window.accountIsAdmin=false;
+window.applyAccessMode=()=>{
+ const shell=document.querySelector('#appShell');
+ if(!shell)return;
+ shell.dataset.readOnly=String(!canWriteData);
+ document.querySelector('.readonly-banner')?.remove();
+ if(!canWriteData&&!shell.hidden){
+  document.querySelector('#main').insertAdjacentHTML('afterbegin','<p class="readonly-banner" role="status">Acceso de solo lectura: puedes consultar los datos, pero no modificarlos.</p>');
+  const writes=/clientForm\(|saveClient\(|delClient\(|instForm\(|saveInst\(|delInst\(|maintForm\(|saveMaint\(|completeMaint\(|delMaint\(|saveCfg\(|setLogo\(|S\.cfg\.logo/;
+  shell.querySelectorAll('button[onclick]').forEach(button=>{if(writes.test(button.getAttribute('onclick')||''))button.hidden=true;});
+  document.querySelectorAll('#main #f_name,#main #f_tech,#main #f_phone,#main #f_addr,#main #f_techs,#main #f_theme,#main input[type="file"]').forEach(input=>{input.disabled=true;});
+ }
+};
+window.cloudRefreshStatus=()=>status(!currentUser?'No has iniciado sesión.':canWriteData?'Sesión iniciada: '+currentUser.email+'. Acceso de lectura y escritura activo.':'Sesión iniciada: '+currentUser.email+'. Acceso de solo lectura.');
 function safeId(id){return String(id).replace(/[^a-zA-Z0-9_-]/g,'_')||'record';}
 function failIfError(result){if(result.error)throw result.error;return result.data;}
 function storedAsset(path){return STORAGE_PREFIX+path;}
@@ -452,10 +476,10 @@ async function unpackAsset(value){
 async function packRecord(kind,item){
  const out={...item};
  if(kind==='inst'){
-  if(Array.isArray(out.photos))out.photos=await Promise.all(out.photos.map((p,i)=>packAsset(p,`${currentUser.id}/inst/${safeId(item.id)}/photo_${i}.jpg`)));
-  if(out.qr)out.qr=await packAsset(out.qr,`${currentUser.id}/inst/${safeId(item.id)}/qr.jpg`);
+  if(Array.isArray(out.photos))out.photos=await Promise.all(out.photos.map((p,i)=>packAsset(p,`${dataOwnerId}/inst/${safeId(item.id)}/photo_${i}.jpg`)));
+  if(out.qr)out.qr=await packAsset(out.qr,`${dataOwnerId}/inst/${safeId(item.id)}/qr.jpg`);
  }
- if(kind==='cfg'&&out.logo)out.logo=await packAsset(out.logo,`${currentUser.id}/cfg/company_logo.png`);
+ if(kind==='cfg'&&out.logo)out.logo=await packAsset(out.logo,`${dataOwnerId}/cfg/company_logo.png`);
  return out;
 }
 async function unpackRecord(kind,item){
@@ -468,27 +492,28 @@ async function unpackRecord(kind,item){
  return out;
 }
 async function readCollection(kind){
- const rows=failIfError(await supabase.from('app_records').select('id,data').eq('user_id',currentUser.id).eq('collection',kind));
+ const rows=failIfError(await supabase.from('app_records').select('id,data').eq('user_id',dataOwnerId).eq('collection',kind));
  return Promise.all(rows.map(row=>unpackRecord(kind,{...row.data,id:row.id})));
 }
 async function writeCollection(kind,items){
- const existing=failIfError(await supabase.from('app_records').select('id').eq('user_id',currentUser.id).eq('collection',kind));
+ const existing=failIfError(await supabase.from('app_records').select('id').eq('user_id',dataOwnerId).eq('collection',kind));
  const ids=new Set(items.map(item=>String(item.id)));
- for(const row of existing)if(!ids.has(row.id))failIfError(await supabase.from('app_records').delete().eq('user_id',currentUser.id).eq('collection',kind).eq('id',row.id));
+ for(const row of existing)if(!ids.has(row.id))failIfError(await supabase.from('app_records').delete().eq('user_id',dataOwnerId).eq('collection',kind).eq('id',row.id));
  if(!items.length)return;
- const rows=await Promise.all(items.map(async item=>({user_id:currentUser.id,collection:kind,id:String(item.id),data:await packRecord(kind,item),updated_at:new Date().toISOString()})));
+ const rows=await Promise.all(items.map(async item=>({user_id:dataOwnerId,collection:kind,id:String(item.id),data:await packRecord(kind,item),updated_at:new Date().toISOString()})));
  failIfError(await supabase.from('app_records').upsert(rows,{onConflict:'user_id,collection,id'}));
 }
 async function readConfig(){
- const rows=failIfError(await supabase.from('app_records').select('id,data').eq('user_id',currentUser.id).eq('collection','cfg').eq('id','main').limit(1));
+ const rows=failIfError(await supabase.from('app_records').select('id,data').eq('user_id',dataOwnerId).eq('collection','cfg').eq('id','main').limit(1));
  return rows.length?unpackRecord('cfg',{...rows[0].data,id:rows[0].id}):null;
 }
 async function writeConfig(){
  const data=await packRecord('cfg',{id:'main',...window.S.cfg});
- failIfError(await supabase.from('app_records').upsert({user_id:currentUser.id,collection:'cfg',id:'main',data,updated_at:new Date().toISOString()},{onConflict:'user_id,collection,id'}));
+ failIfError(await supabase.from('app_records').upsert({user_id:dataOwnerId,collection:'cfg',id:'main',data,updated_at:new Date().toISOString()},{onConflict:'user_id,collection,id'}));
 }
 async function syncAll(){
  if(!currentUser||loadingRemote)return;
+ if(!canWriteData){status(`Acceso de solo lectura · ${currentUser.email}`);return;}
  if(busy){queued=true;return;}
  busy=true;status('Sincronizando datos y archivos…');
  try{
@@ -500,6 +525,27 @@ async function syncAll(){
 }
 window.cloudSync=()=>{if(currentUser&&!loadingRemote)syncAll();};
 window.cloudSyncNow=()=>{if(!currentUser){status('Inicia sesión primero para sincronizar.');return;}syncAll();};
+window.loadAccountAccess=async()=>{
+ const target=document.querySelector('#accountAccessList');if(!target||!isAdmin)return;
+ target.textContent='Cargando cuentas…';
+ try{
+  const {data,error}=await supabase.rpc('admin_list_accounts');if(error)throw error;
+  target.innerHTML=data.map(account=>{
+   const mode=account.can_write?'write':account.can_read?'read':'none';
+   return `<div class="account-access-row"><div><strong>${escapeHtml(account.email||'Cuenta sin correo')}</strong><small>${account.is_admin?'Administrador':'Creada '+new Date(account.created_at).toLocaleDateString('es-NI')}</small></div><select aria-label="Permiso de ${escapeHtml(account.email||'cuenta')}" ${account.is_admin?'disabled':''}><option value="none" ${mode==='none'?'selected':''}>Sin acceso</option><option value="read" ${mode==='read'?'selected':''}>Solo lectura</option><option value="write" ${mode==='write'?'selected':''}>Lectura y escritura</option></select>${account.is_admin?'<span class="badge">Administrador</span>':'<button class="btn g" type="button" onclick="saveAccountAccess(this)">Guardar</button>'}</div>`;
+  }).join('')||'<p class="mut">No hay cuentas registradas.</p>';
+ }catch(e){console.error(e);target.textContent=`No se pudieron cargar las cuentas: ${e.message||'verifica que aplicaste supabase-schema.sql'}`;}
+};
+window.saveAccountAccess=async(button)=>{
+ const row=button.closest('.account-access-row'),email=row?.querySelector('strong')?.textContent,mode=row?.querySelector('select')?.value;
+ if(!email||!mode)return;
+ button.disabled=true;button.textContent='Guardando…';
+ try{
+  const {error}=await supabase.rpc('admin_set_account_access',{p_email:email,p_can_read:mode!=='none',p_can_write:mode==='write'});
+  if(error)throw error;
+  toast(`Permiso actualizado para ${email}`);await window.loadAccountAccess();
+ }catch(e){console.error(e);button.disabled=false;button.textContent='Guardar';status(`No se pudo actualizar el permiso: ${e.message||'error de Supabase'}`);}
+};
 window.sbRegister=async()=>{
  try{
   const email=document.querySelector('#loginEmail')?.value.trim(),password=document.querySelector('#loginPass')?.value;
@@ -620,14 +666,18 @@ window.uploadProfilePhoto=async(input)=>{
 };
 async function handleSession(user){
  currentUser=user;
- window.cloudRefreshStatus?.();
- if(!user){authLoadSequence++;loadingUserId='';loadedUserId='';loadingRemote=false;signedAssetPaths.clear();window.profileData=null;showLogin();return;}
+ if(!user){authLoadSequence++;loadingUserId='';loadedUserId='';loadingRemote=false;dataOwnerId='';canWriteData=false;isAdmin=false;window.accountIsAdmin=false;signedAssetPaths.clear();window.profileData=null;showLogin();return;}
  if(loadedUserId===user.id){await refreshProfile(user);showApp();return;}
  if(loadingUserId===user.id)return;
+ dataOwnerId='';canWriteData=false;isAdmin=false;window.accountIsAdmin=false;showLogin();
  const sequence=++authLoadSequence;
  loadingUserId=user.id;loadingRemote=true;status('Cargando tus datos de Supabase…');
  try{
   await window.localReady;
+  const accessResult=failIfError(await supabase.rpc('get_app_data_access'));
+  const access=accessResult?.[0];
+  if(!access?.can_read||!access.data_owner_id)throw new Error('Tu cuenta aún no tiene permiso para consultar los datos. Pídele al administrador que habilite el acceso.');
+  dataOwnerId=access.data_owner_id;canWriteData=Boolean(access.can_write);isAdmin=Boolean(access.is_admin);window.accountIsAdmin=isAdmin;
   const [clients,inst,maint,cfg]=await Promise.all([readCollection('clients'),readCollection('inst'),readCollection('maint'),readConfig()]);
   if(sequence!==authLoadSequence||currentUser?.id!==user.id)return;
   // Start from this Supabase account only; browser data from another backend is not imported.
@@ -640,8 +690,10 @@ async function handleSession(user){
   if(sequence!==authLoadSequence||currentUser?.id!==user.id)return;
   loadingUserId='';loadingRemote=false;console.error(e);
   const message=e.code==='PGRST205'||/could not find the table ['"]?public\.app_records/i.test(e.message||'')
-   ?'Falta la tabla public.app_records. En Supabase, abre SQL Editor, ejecuta el contenido de supabase-schema.sql y vuelve a cargar la app. Si ya ejecutaste el SQL, ejecuta NOTIFY pgrst, \'reload schema\'; en el SQL Editor.'
-   :`Error al cargar Supabase: ${e.message||'verifica el esquema, las políticas y el almacenamiento'}`;
+   ?'Falta la tabla public.app_records. En Supabase, abre SQL Editor, ejecuta supabase-schema.sql y vuelve a cargar la app.'
+   :/get_app_data_access|schema cache|function.*not found/i.test(e.message||'')
+    ?'Faltan las funciones y permisos de cuentas. En Supabase, abre SQL Editor, ejecuta supabase-schema.sql y vuelve a cargar la app.'
+    :`Error al cargar Supabase: ${e.message||'verifica el esquema, los permisos y el almacenamiento'}`;
   status(message);
  }
 }
