@@ -114,6 +114,13 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
 .password-dialog .mut{margin:0 0 18px}
 .password-dialog .f1{margin-bottom:14px}
 .password-dialog-message{min-height:20px;margin:12px 0 0;color:var(--dan);font-size:13px}
+.registration-dialog{max-width:480px}
+.registration-dialog h1{margin-bottom:6px}
+.registration-dialog .mut{margin:0 0 18px}
+.registration-photo{display:flex;align-items:center;gap:12px;margin-top:8px}
+.registration-photo img{width:64px;height:64px;object-fit:cover;border-radius:50%;background:var(--pri2)}
+.registration-photo span{color:var(--mut);font-size:12px}
+.registration-dialog button:disabled{opacity:.65;cursor:wait}
 .readonly-banner{padding:10px 13px;border:1px solid var(--bd);border-radius:9px;background:var(--pri2);color:var(--pri)}
 .account-access-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(145px,200px) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd)}
 .account-access-row:last-child{border-bottom:0}
@@ -163,7 +170,7 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
     <label class="remember-row"><input id="rememberUser" type="checkbox"> Recordar mi correo en este dispositivo</label>
     <div class="login-actions">
      <button class="btn login-primary" type="submit">Iniciar sesión</button>
-     <button class="btn g" type="button" onclick="sbRegister()">Crear cuenta con correo</button>
+     <button class="btn g" type="button" onclick="openAccountRegistration()">Crear cuenta con correo</button>
     </div>
    </form>
    <p id="loginMessage" role="status" aria-live="polite">Verificando conexión…</p>
@@ -544,17 +551,82 @@ window.saveAccountAccess=async(button)=>{
   toast(`Permiso actualizado para ${email}`);await window.loadAccountAccess();
  }catch(e){console.error(e);button.disabled=false;button.textContent='Guardar';status(`No se pudo actualizar el permiso: ${e.message||'error de Supabase'}`);}
 };
-window.sbRegister=async()=>{
- try{
-  const email=document.querySelector('#loginEmail')?.value.trim(),password=document.querySelector('#loginPass')?.value;
-  if(!email||!password)throw new Error('Escribe tu correo y una contraseña.');
-  if(password.length<6)throw new Error('La contraseña debe tener al menos 6 caracteres.');
-  status('Creando cuenta…');
-  const {data,error}=await supabase.auth.signUp({email,password});
-  if(error)throw error;
-  if(!data.session)status('Cuenta creada. Revisa tu correo para confirmar la dirección y luego inicia sesión.');
- }catch(e){status(authError(e));}
+window.openAccountRegistration=()=>{
+ const email=document.querySelector('#loginEmail')?.value.trim()||'';
+ modal(`<form class="registration-dialog" role="dialog" aria-modal="true" aria-labelledby="registrationTitle" onsubmit="submitAccountRegistration(event)">
+  <h1 id="registrationTitle">Crear cuenta</h1>
+  <p class="mut">Completa tus datos y el código de autorización del administrador.</p>
+  <div class="f1"><label for="registrationName">Nombre completo</label><input id="registrationName" name="name" type="text" autocomplete="name" maxlength="80" required></div>
+  <div class="f1"><label for="registrationPhoto">Fotografía</label><input id="registrationPhoto" name="photo" type="file" accept="image/jpeg,image/png,image/webp" required onchange="previewRegistrationPhoto(this)"><div class="registration-photo"><img id="registrationPhotoPreview" alt="Vista previa de la fotografía" hidden><span>JPG, PNG o WebP (máximo 5 MB)</span></div></div>
+  <div class="f1"><label for="registrationEmail">Correo electrónico</label><input id="registrationEmail" name="email" type="email" autocomplete="email" maxlength="254" value="${escapeHtml(email)}" required></div>
+  <div class="f1"><label for="registrationPassword">Contraseña</label><input id="registrationPassword" name="password" type="password" autocomplete="new-password" minlength="6" required></div>
+  <div class="f1"><label for="registrationCode">Código del administrador</label><input id="registrationCode" name="code" type="password" autocomplete="off" required></div>
+  <p class="password-dialog-message" id="registrationMessage" role="status" aria-live="polite"></p>
+  <div class="acts"><button class="btn" id="registrationSubmit" type="submit">Crear cuenta</button><button class="btn g" type="button" onclick="closeM()">Cancelar</button></div>
+ </form>`);
+ document.querySelector('#registrationName')?.focus();
 };
+window.previewRegistrationPhoto=input=>{
+ const file=input.files?.[0],preview=document.querySelector('#registrationPhotoPreview');
+ if(!preview)return;
+ if(preview.dataset.url)URL.revokeObjectURL(preview.dataset.url);
+ if(!file){preview.removeAttribute('src');preview.hidden=true;return;}
+ preview.dataset.url=URL.createObjectURL(file);preview.src=preview.dataset.url;preview.hidden=false;
+};
+function registrationPhotoData(file){
+ return new Promise((resolve,reject)=>{
+  const reader=new FileReader();
+  reader.onerror=()=>reject(new Error('No se pudo leer la fotografía.'));
+  reader.onload=()=>{
+   const image=new Image();
+   image.onerror=()=>reject(new Error('El archivo no contiene una imagen válida.'));
+   image.onload=()=>{
+    const scale=Math.min(1,256/Math.max(image.width,image.height)),canvas=document.createElement('canvas');
+    canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));
+    const context=canvas.getContext('2d');
+    if(!context){reject(new Error('No se pudo procesar la fotografía.'));return;}
+    context.drawImage(image,0,0,canvas.width,canvas.height);
+    resolve(canvas.toDataURL('image/jpeg',.68));
+   };
+   image.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+ });
+}
+window.submitAccountRegistration=async event=>{
+ event.preventDefault();
+ const button=document.querySelector('#registrationSubmit'),message=document.querySelector('#registrationMessage');
+ const name=document.querySelector('#registrationName').value.trim(),photo=document.querySelector('#registrationPhoto').files?.[0],
+  email=document.querySelector('#registrationEmail').value.trim(),password=document.querySelector('#registrationPassword').value,
+  code=document.querySelector('#registrationCode').value;
+ let pendingKey='';
+ try{
+  if(!name||name.length>80)throw new Error('Escribe tu nombre completo (máximo 80 caracteres).');
+  if(!photo)throw new Error('Selecciona una fotografía.');
+  if(!['image/jpeg','image/png','image/webp'].includes(photo.type))throw new Error('Elige una imagen JPG, PNG o WebP.');
+  if(photo.size>5*1024*1024)throw new Error('La fotografía no puede superar 5 MB.');
+  if(!email||!password||password.length<6||!code)throw new Error('Completa todos los campos. La contraseña debe tener al menos 6 caracteres.');
+  button.disabled=true;button.textContent='Preparando…';message.textContent='Procesando tu fotografía…';
+  const avatarData=await registrationPhotoData(photo);
+  pendingKey=`pending-registration-avatar:${email.toLowerCase()}`;
+  localStorage.setItem(pendingKey,avatarData);
+  button.textContent='Creando cuenta…';message.textContent='Registrando tu cuenta…';
+  const {data,error}=await supabase.auth.signUp({email,password,options:{data:{display_name:name,full_name:name,admin_registration_code:code}}});
+  if(error)throw error;
+  if(data.session){
+   status('Cuenta creada. Cargando tu perfil…');
+  }else{
+   closeM();status('Cuenta creada. Revisa tu correo para confirmar la dirección y luego inicia sesión.');
+  }
+ }catch(e){
+  if(pendingKey){
+   try{localStorage.removeItem(pendingKey);}catch(cleanupError){console.error(cleanupError);}
+  }
+  message.textContent=authError(e);
+  button.disabled=false;button.textContent='Crear cuenta';
+ }
+};
+window.sbRegister=()=>window.openAccountRegistration();
 window.sbLogin=async()=>{
  try{
   const email=document.querySelector('#loginEmail')?.value.trim(),password=document.querySelector('#loginPass')?.value;
@@ -574,6 +646,7 @@ window.sbLogout=async()=>{
 };
 function authError(e){
  const message=String(e.message||'');
+ if(/valid administrator registration code|administrator code/i.test(message))return 'El código del administrador es incorrecto.';
  if(/invalid login credentials/i.test(message))return 'Correo o contraseña incorrectos.';
  if(/email not confirmed/i.test(message))return 'Confirma tu correo antes de iniciar sesión.';
  if(/already registered/i.test(message))return 'Ese correo ya tiene una cuenta. Inicia sesión.';
@@ -581,6 +654,16 @@ function authError(e){
  if(/provider is not enabled/i.test(message))return 'Activa el proveedor de acceso correspondiente en Supabase Authentication.';
  if(/redirect.*not allowed|url.*not allowed/i.test(message))return 'Agrega la URL de esta aplicación a las URLs permitidas en Supabase Authentication.';
  return message||'Error de autenticación.';
+}
+async function uploadPendingRegistrationAvatar(user){
+ const key=`pending-registration-avatar:${user.email?.toLowerCase()||''}`,avatar=localStorage.getItem(key);
+ if(!avatar)return user;
+ const blob=await fetch(avatar).then(response=>response.blob()),path=`${user.id}/profile/avatar.jpg`;
+ failIfError(await supabase.storage.from(STORAGE_BUCKET).upload(path,blob,{upsert:true,contentType:'image/jpeg'}));
+ const {data,error}=await supabase.auth.updateUser({data:{...user.user_metadata,avatar_path:path}});
+ if(error)throw error;
+ localStorage.removeItem(key);
+ return data.user;
 }
 async function refreshProfile(user){
  const metadata=user.user_metadata||{},avatarPath=metadata.avatar_path;
@@ -678,8 +761,11 @@ async function handleSession(user){
  if(loadingUserId===user.id)return;
  dataOwnerId='';canWriteData=false;isAdmin=false;window.accountIsAdmin=false;showLogin();
  const sequence=++authLoadSequence;
+ let avatarUploadFailed=false;
  loadingUserId=user.id;loadingRemote=true;status('Cargando tus datos de Supabase…');
  try{
+  try{user=await uploadPendingRegistrationAvatar(user);currentUser=user;}
+  catch(e){console.error(e);avatarUploadFailed=true;}
   await window.localReady;
   const accessResult=failIfError(await supabase.rpc('get_app_data_access'));
   const access=accessResult?.[0];
@@ -693,6 +779,10 @@ async function handleSession(user){
   await Promise.all([window.kvSet('clients',window.S.clients),window.kvSet('inst',window.S.inst),window.kvSet('maint',window.S.maint),window.kvSet('cfg',window.S.cfg)]);
   loadedUserId=user.id;loadingUserId='';loadingRemote=false;
   await refreshProfile(user);showApp();window.go('dash');await syncAll();
+  if(avatarUploadFailed){
+   const toast=document.querySelector('#toast');
+   if(toast){toast.textContent='No se pudo guardar la fotografía. Puedes volver a cargarla desde tu perfil.';toast.style.display='block';setTimeout(()=>toast.style.display='none',4000);}
+  }
  }catch(e){
   if(sequence!==authLoadSequence||currentUser?.id!==user.id)return;
   loadingUserId='';loadingRemote=false;console.error(e);

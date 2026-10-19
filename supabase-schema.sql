@@ -225,6 +225,22 @@ begin
 end;
 $$;
 
+create or replace function public.app_validate_registration_code()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, auth, pg_temp
+set row_security = off
+as $$
+begin
+  if new.raw_user_meta_data->>'admin_registration_code' is distinct from 'ELECTRON2711' then
+    raise exception 'A valid administrator registration code is required';
+  end if;
+  new.raw_user_meta_data := coalesce(new.raw_user_meta_data, '{}'::jsonb) - 'admin_registration_code';
+  return new;
+end;
+$$;
+
 create or replace function public.app_handle_new_user()
 returns trigger
 language plpgsql
@@ -241,6 +257,11 @@ begin
   return new;
 end;
 $$;
+
+drop trigger if exists on_auth_user_validate_registration_code on auth.users;
+create trigger on_auth_user_validate_registration_code
+  before insert on auth.users
+  for each row execute function public.app_validate_registration_code();
 
 drop trigger if exists on_auth_user_created_app_permissions on auth.users;
 create trigger on_auth_user_created_app_permissions
@@ -373,6 +394,7 @@ revoke all on function public.app_can_write_data() from public, anon;
 revoke all on function public.get_app_data_access() from public, anon;
 revoke all on function public.admin_list_accounts() from public, anon;
 revoke all on function public.admin_set_account_access(text, boolean, boolean) from public, anon;
+revoke all on function public.app_validate_registration_code() from public, anon, authenticated;
 revoke all on function public.app_handle_new_user() from public, anon, authenticated;
 grant execute on function public.app_is_admin() to authenticated;
 grant execute on function public.app_current_data_owner() to authenticated;
