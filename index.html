@@ -1,4 +1,4 @@
-<!doctype html>
+EStá perfectro<!doctype html>
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Gestión de instalaciones</title>
@@ -94,23 +94,26 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
 .login-card{align-self:center;width:100%;box-sizing:border-box;padding:46px 40px;animation:login-fade .7s .18s both}
 .login-mark{width:48px;height:48px;display:grid;place-items:center;margin-bottom:24px;border-radius:15px;background:var(--pri2);color:var(--pri);font-size:23px}
 .login-card h1{font-size:27px;letter-spacing:-.035em;margin:0 0 6px}.login-intro{margin:0 0 25px;color:var(--mut)}
-.login-field{margin-bottom:17px}.login-field label{font-weight:600;color:var(--tx);margin-bottom:6px}
+.login-field{margin-bottom:17px;animation:login-field-enter .55s cubic-bezier(.2,.75,.25,1) both}.login-field:nth-child(1){animation-delay:.22s}.login-field:nth-child(2){animation-delay:.32s}.login-field label{font-weight:600;color:var(--tx);margin-bottom:6px;transition:color .2s}
+.login-field:focus-within label{color:var(--pri)}
 .login-card input{padding:12px;transition:border-color .2s,box-shadow .2s,background .2s}
 .login-card input:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 4px color-mix(in srgb,var(--pri) 15%,transparent)}
-.remember-row{display:flex;align-items:center;gap:8px;margin:0;color:var(--mut);font-size:13px;cursor:pointer}
+.remember-row{display:flex;align-items:center;gap:8px;margin:0;color:var(--mut);font-size:13px;cursor:pointer;animation:login-field-enter .55s .42s cubic-bezier(.2,.75,.25,1) both}
 .remember-row input{width:auto;margin:0;accent-color:var(--pri)}
-.login-actions{display:grid;gap:10px;margin-top:21px}
+.login-actions{display:grid;gap:10px;margin-top:21px;animation:login-field-enter .55s .5s cubic-bezier(.2,.75,.25,1) both}
 .login-actions .btn{width:100%;padding:12px;transition:transform .18s,box-shadow .18s,background .18s}
 .login-actions .btn:hover{transform:translateY(-2px);box-shadow:0 7px 16px #0b5fd933}
 .login-actions .btn:active{transform:translateY(0)}
 .login-primary{box-shadow:0 5px 14px #0b5fd933}
-.google-btn{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--card)!important;color:var(--tx)!important;border:1px solid var(--bd)!important}
-.google-btn svg{width:18px;height:18px}
-.login-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--mut);font-size:12px}
-.login-divider:before,.login-divider:after{content:"";height:1px;flex:1;background:var(--bd)}
 #loginMessage{min-height:22px;margin:15px 0 0;color:var(--mut);font-size:13px}
 #loginMessage[data-error="true"]{color:var(--dan)}
 .login-secure{margin:23px 0 0;padding-top:17px;border-top:1px solid var(--bd);color:var(--mut);font-size:11px;text-align:center}
+.password-dialog{max-width:420px}
+.mb.password-change-modal{max-width:420px}
+.password-dialog h1{margin-bottom:6px}
+.password-dialog .mut{margin:0 0 18px}
+.password-dialog .f1{margin-bottom:14px}
+.password-dialog-message{min-height:20px;margin:12px 0 0;color:var(--dan);font-size:13px}
 .readonly-banner{padding:10px 13px;border:1px solid var(--bd);border-radius:9px;background:var(--pri2);color:var(--pri)}
 .account-access-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(145px,200px) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd)}
 .account-access-row:last-child{border-bottom:0}
@@ -118,6 +121,7 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
 .account-access-row small{color:var(--mut);font-size:12px}
 @keyframes login-rise{from{opacity:0;transform:translateY(16px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes login-fade{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes login-field-enter{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:translateY(0)}}
 @keyframes orbit{to{transform:rotate(360deg)}}
 @media print{body.printing>*:not(#printRoot){display:none!important}body.printing #printRoot{display:block}.rp{padding:0}}
 @media (max-width:760px){.app{display:block;min-height:100vh}
@@ -160,8 +164,6 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
     <div class="login-actions">
      <button class="btn login-primary" type="submit">Iniciar sesión</button>
      <button class="btn g" type="button" onclick="sbRegister()">Crear cuenta con correo</button>
-     <div class="login-divider">o continúa con</div>
-     <button class="btn google-btn" type="button" onclick="sbGoogleLogin()"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.42 37.98 46.98 31.88 46.98 24.55z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.55 2.56 10.78z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.15 1.45-4.92 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continuar con Google</button>
     </div>
    </form>
    <p id="loginMessage" role="status" aria-live="polite">Verificando conexión…</p>
@@ -229,12 +231,8 @@ function brand(){
     <div class="profile-actions"><button class="btn" type="button" onclick="saveProfileName()">Guardar nombre</button></div>
     <label class="profile-file" for="profilePhoto">Fotografía</label><input id="profilePhoto" type="file" accept="image/jpeg,image/png,image/webp" onchange="uploadProfilePhoto(this)">
    </div>
-   <div class="profile-section" style="padding-top:12px">
-    <label for="profilePassword">Nueva contraseña</label><input id="profilePassword" type="password" autocomplete="new-password" minlength="6" placeholder="Mínimo 6 caracteres">
-    <label for="profilePasswordConfirm">Confirmar contraseña</label><input id="profilePasswordConfirm" type="password" autocomplete="new-password" minlength="6" placeholder="Repite la contraseña">
-    <div class="profile-actions"><button class="btn g" type="button" onclick="changeProfilePassword()">Cambiar contraseña</button></div>
-   </div>
    <p class="profile-message" id="profileMessage" role="status" aria-live="polite">${esc(p.email||'')}</p>
+   <div class="profile-actions"><button class="btn g" type="button" onclick="openProfilePassword()">Cambiar contraseña</button></div>
    <div class="profile-actions"><button class="btn d" type="button" onclick="sbLogout()">Cerrar sesión</button></div>
   </div>`;
  document.title=c.name+' – Gestión de instalaciones';
@@ -566,14 +564,6 @@ window.sbLogin=async()=>{
   if(error)throw error;
  }catch(e){status(authError(e));}
 };
-window.sbGoogleLogin=async()=>{
- try{
-  if(location.protocol==='file:')throw new Error('Abre la aplicación desde localhost o desde un sitio publicado para iniciar con Google.');
-  status('Conectando con Google…');
-  const {error}=await supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.href}});
-  if(error)throw error;
- }catch(e){status(authError(e));}
-};
 window.sbLogout=async()=>{
  try{
   const {error}=await supabase.auth.signOut();
@@ -617,6 +607,19 @@ window.toggleProfileMenu=()=>{
  trigger.setAttribute('aria-expanded',String(!popover.hidden));
  if(!popover.hidden)document.querySelector('#profileName')?.focus();
 };
+window.openProfilePassword=()=>{
+ closeProfileMenu();
+ modal(`<div class="password-dialog" role="dialog" aria-modal="true" aria-labelledby="passwordDialogTitle">
+ <h1 id="passwordDialogTitle">Cambiar contraseña</h1>
+ <p class="mut">Elige una contraseña nueva para tu cuenta.</p>
+ <div class="f1"><label for="profilePassword">Nueva contraseña</label><input id="profilePassword" type="password" autocomplete="new-password" minlength="6" placeholder="Mínimo 6 caracteres"></div>
+ <div class="f1"><label for="profilePasswordConfirm">Confirmar contraseña</label><input id="profilePasswordConfirm" type="password" autocomplete="new-password" minlength="6" placeholder="Repite la contraseña"></div>
+ <p class="password-dialog-message" id="passwordChangeMessage" role="status" aria-live="polite"></p>
+ <div class="acts"><button class="btn" type="button" onclick="changeProfilePassword()">Guardar contraseña</button><button class="btn g" type="button" onclick="closeM()">Cancelar</button></div>
+ </div>`);
+ $('#modal .mb').classList.add('password-change-modal');
+ document.querySelector('#profilePassword')?.focus();
+};
 function closeProfileMenu(){
  const popover=document.querySelector('#profilePopover'),trigger=document.querySelector('.profile-trigger');
  if(popover)popover.hidden=true;
@@ -645,8 +648,12 @@ window.changeProfilePassword=async()=>{
   const {error}=await supabase.auth.updateUser({password});
   if(error)throw error;
   $('#profilePassword').value='';$('#profilePasswordConfirm').value='';
-  profileMessage('Contraseña actualizada.');toast('Contraseña actualizada');
- }catch(e){profileMessage(e.message||'No se pudo cambiar la contraseña.',true);}
+  closeM();toast('Contraseña actualizada');
+ }catch(e){
+  const message=document.querySelector('#passwordChangeMessage');
+  if(message)message.textContent=e.message||'No se pudo cambiar la contraseña.';
+  else profileMessage(e.message||'No se pudo cambiar la contraseña.',true);
+ }
 };
 window.uploadProfilePhoto=async(input)=>{
  const file=input.files?.[0];if(!file)return;
