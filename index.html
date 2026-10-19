@@ -48,6 +48,14 @@ textarea{min-height:70px;resize:vertical}
 label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
 .btn{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:9px 15px;font:inherit;font-weight:600;cursor:pointer}
 .btn.g{background:var(--pri2);color:var(--pri)}.btn.d{background:none;color:var(--dan);border:1px solid var(--bd)}
+.page-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px}
+.page-heading h1{margin:0}
+.page-actions{display:flex;flex-wrap:wrap;gap:10px}
+.btn.create-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 18px;border:1px solid #084bb0;border-radius:11px;background:linear-gradient(135deg,#1673ed,#0b55c4);box-shadow:0 5px 14px rgba(11,95,217,.24);font-weight:700;transition:transform .18s,box-shadow .18s}
+.btn.create-action:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(11,95,217,.3)}
+.btn.create-action.alt{border-color:#087c81;background:linear-gradient(135deg,#13a5a2,#087d82);box-shadow:0 5px 14px rgba(8,125,130,.22)}
+.btn.create-action.alt:hover{box-shadow:0 8px 18px rgba(8,125,130,.3)}
+.create-action-icon{font-size:20px;line-height:1}
 .bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}.bar>input{flex:1;min-width:200px}.bar>select{width:auto}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(20,35,65,.035);transition:border-color .18s,transform .18s}.card.item:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(20,35,65,.08)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
@@ -144,6 +152,8 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
 .nav-backdrop{position:fixed;z-index:80;inset:0;display:block;border:0;background:#0712259c;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
 .nav-backdrop.open{opacity:1;visibility:visible}
 .main{padding:18px 14px calc(24px + env(safe-area-inset-bottom,0px))}
+.page-heading{align-items:flex-start;flex-direction:column;gap:12px;margin-bottom:16px}
+.page-actions{width:100%}.page-actions .create-action{flex:1}
 .f2{grid-template-columns:1fr}.kv{grid-template-columns:1fr}
 #loginScreen{padding:16px;align-items:start}.login-layout{max-width:480px;min-height:0;grid-template-columns:1fr;border-radius:22px}
 .login-showcase{min-height:300px;padding:25px 27px 23px}.login-company{gap:13px;margin:19px 0 18px}.login-company-logo{width:58px;height:58px;border-radius:16px;font-size:26px}.login-company-name{font-size:25px}.login-company-caption{font-size:10px;margin-top:4px}.login-copy{margin:14px 0 17px}.login-copy h2{font-size:29px;margin-bottom:8px}.login-copy p{font-size:13px}
@@ -191,7 +201,18 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const today=()=>new Date().toISOString().slice(0,10);
 const fmt=d=>d?new Date(d+'T00:00').toLocaleDateString('es-NI',{day:'2-digit',month:'short',year:'numeric'}):'';
-const money=n=>n?'C$ '+Number(n).toLocaleString('es-NI'):'—';
+const money=(n,currency='NIO')=>{
+ if(n==null||n==='')return '—';
+ const amount=Number(n);
+ if(!Number.isFinite(amount))return '—';
+ const symbol=currency==='USD'?'US$':'C$';
+ return `${symbol} ${amount.toLocaleString('es-NI',{minimumFractionDigits:currency==='USD'?2:0,maximumFractionDigits:2})}`;
+};
+const moneyTotals=items=>{
+ const totals=new Map();
+ items.forEach(item=>{if(item.cost==null||item.cost==='')return;const currency=item.currency==='USD'?'USD':'NIO';totals.set(currency,(totals.get(currency)||0)+(Number(item.cost)||0));});
+ return [...totals].map(([currency,total])=>money(total,currency)).join(' · ')||'—';
+};
 const TYPES=['Cámaras de seguridad','Sistema eléctrico','Alarma y control de acceso','Mantenimiento','Venta de cámaras','Venta e instalación','Instalación de cámaras','Reparación','Reparación y diagnóstico','Mantenimiento preventivo','Mantenimiento correctivo','Configuración y soporte','Otro'],STAT=['Completada','En proceso','Pendiente'];
 let S={clients:[],inst:[],maint:[],cfg:{name:'Mi Empresa',logo:'',tech:'',phone:'',addr:'',techs:'',theme:'auto'}},view='dash',tmp={photos:[],qr:''};
 const REMEMBERED_EMAIL_KEY='gestor-inst-remembered-email';
@@ -273,17 +294,16 @@ function go(v){view=v;nav();({dash:Vdash,clients:Vcl,inst:Vin,maint:Vmaint,rep:V
 document.addEventListener('keydown',event=>{if(event.key==='Escape')closeNavMenu();});
 window.addEventListener('resize',()=>{if(window.innerWidth>760)closeNavMenu();});
 const render=()=>go(view);
-const card=i=>`<div class="card item" onclick="instView('${i.id}')">${i.photos[0]?`<img class="thumb" src="${i.photos[0]}" alt="">`:'<div class="thumb">📷</div>'}<div><b>${esc(cname(i.client))}</b><div>${esc(i.type)} <span class="badge">${esc(i.status)}</span></div><small class="mut">${fmt(i.date)} · ${esc(i.tech||'Sin técnico')} · ${money(i.cost)}</small></div></div>`;
+const card=i=>`<div class="card item" onclick="instView('${i.id}')">${i.photos[0]?`<img class="thumb" src="${i.photos[0]}" alt="">`:'<div class="thumb">📷</div>'}<div><b>${esc(cname(i.client))}</b><div>${esc(i.type)} <span class="badge">${esc(i.status)}</span></div><small class="mut">${fmt(i.date)} · ${esc(i.tech||'Sin técnico')} · ${money(i.cost,i.currency||'NIO')}</small></div></div>`;
 /* Panel */
 function Vdash(){const m=today().slice(0,7),rec=[...S.inst].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
- main.innerHTML=`<h1>Panel</h1><div class="stats">
+ main.innerHTML=`<div class="page-heading"><h1>Panel</h1><div class="page-actions"><button class="btn create-action" onclick="clientForm()"><span class="create-action-icon" aria-hidden="true">＋</span>Nuevo cliente</button><button class="btn create-action alt" onclick="instForm()"><span class="create-action-icon" aria-hidden="true">＋</span>Nueva instalación</button></div></div><div class="stats">
  <div class="card"><b>${S.clients.length}</b>Clientes</div><div class="card"><b>${S.inst.length}</b>Instalaciones</div>
  <div class="card"><b>${S.inst.filter(i=>i.date.startsWith(m)).length}</b>Este mes</div>
- <div class="card"><b>${money(S.inst.reduce((a,i)=>a+(+i.cost||0),0))}</b>Total facturado</div></div>
- <h2>Últimas instalaciones</h2><div class="grid">${rec.map(card).join('')||'<p class="mut">Aún no hay registros. Agrega tu primer cliente para empezar.</p>'}</div>
- <div class="acts"><button class="btn" onclick="clientForm()">Nuevo cliente</button><button class="btn g" onclick="instForm()">Nueva instalación</button></div>`}
+ <div class="card"><b style="font-size:20px">${moneyTotals(S.inst)}</b>Total facturado</div></div>
+ <h2>Últimas instalaciones</h2><div class="grid">${rec.map(card).join('')||'<p class="mut">Aún no hay registros. Agrega tu primer cliente para empezar.</p>'}</div>`}
 /* Clientes */
-function Vcl(){main.innerHTML=`<h1>Clientes</h1><div class="bar"><input id="q" placeholder="Buscar por nombre, teléfono o dirección"><button class="btn" onclick="clientForm()">Nuevo cliente</button></div><div id="list" class="grid"></div>`;$('#q').oninput=fillC;fillC()}
+function Vcl(){main.innerHTML=`<div class="page-heading"><h1>Clientes</h1><div class="page-actions"><button class="btn create-action" onclick="clientForm()"><span class="create-action-icon" aria-hidden="true">＋</span>Nuevo cliente</button></div></div><div class="bar"><input id="q" placeholder="Buscar por nombre, teléfono o dirección"></div><div id="list" class="grid"></div>`;$('#q').oninput=fillC;fillC()}
 function fillC(){const q=$('#q').value.toLowerCase(),l=S.clients.filter(c=>[c.name,c.phone,c.addr,c.email].join(' ').toLowerCase().includes(q));
  $('#list').innerHTML=l.map(c=>`<div class="card item" onclick="clientView('${c.id}')"><div class="thumb">👤</div><div><b>${esc(c.name)}</b><div class="mut">${esc(c.phone||'Sin teléfono')}</div><small class="mut">${esc(c.addr)}</small><div><span class="badge">${S.inst.filter(i=>i.client===c.id).length} instalaciones</span></div></div></div>`).join('')||'<p class="mut">No hay clientes que coincidan.</p>'}
 function clientForm(id){const c=S.clients.find(x=>x.id===id)||{};modal(`<h1>${id?'Editar':'Nuevo'} cliente</h1>
@@ -299,11 +319,10 @@ function clientView(id){const c=S.clients.find(x=>x.id===id),l=S.inst.filter(i=>
  <div class="acts"><button class="btn" onclick="instForm('','${id}')">Nueva instalación</button><button class="btn g" onclick="clientForm('${id}')">Editar</button>${confirmBtn('Eliminar',`delClient('${id}')`)}<button class="btn g" onclick="closeM()">Cerrar</button></div>`)}
 function delClient(id){if(!window.ensureWritable())return;S.clients=S.clients.filter(c=>c.id!==id);S.inst=S.inst.filter(i=>i.client!==id);save();closeM();render();toast('Cliente eliminado')}
 /* Instalaciones */
-function Vin(){main.innerHTML=`<h1>Instalaciones e historial</h1><div class="bar"><input id="q" placeholder="Buscar cliente, equipo, red wifi, técnico, notas…">
+function Vin(){main.innerHTML=`<div class="page-heading"><h1>Instalaciones e historial</h1><div class="page-actions"><button class="btn create-action" onclick="instForm()"><span class="create-action-icon" aria-hidden="true">＋</span>Nueva instalación</button></div></div><div class="bar"><input id="q" placeholder="Buscar cliente, equipo, red wifi, técnico, notas…">
  <select id="ft"><option value="">Todos los tipos</option>${TYPES.map(t=>`<option>${t}</option>`).join('')}</select>
  <select id="fs"><option value="">Todos los estados</option>${STAT.map(t=>`<option>${t}</option>`).join('')}</select>
- <input id="fd" type="date" style="width:auto" title="Desde"><input id="fh" type="date" style="width:auto" title="Hasta">
- <button class="btn" onclick="instForm()">Nueva instalación</button></div><div id="list" class="grid"></div>`;
+ <input id="fd" type="date" style="width:auto" title="Desde"><input id="fh" type="date" style="width:auto" title="Hasta"></div><div id="list" class="grid"></div>`;
  ['q','ft','fs','fd','fh'].forEach(i=>$('#'+i).oninput=fillI);fillI()}
 function filt(q,t,s,d,h){q=(q||'').toLowerCase();return S.inst.filter(i=>(!t||i.type===t)&&(!s||i.status===s)&&(!d||i.date>=d)&&(!h||i.date<=h)&&[cname(i.client),i.type,i.tech,i.equip,i.det,i.dvr,i.wifi,i.notes].join(' ').toLowerCase().includes(q)).sort((a,b)=>b.date.localeCompare(a.date))}
 function fillI(){$('#list').innerHTML=filt($('#q').value,$('#ft').value,$('#fs').value,$('#fd').value,$('#fh').value).map(card).join('')||'<p class="mut">No se encontraron instalaciones.</p>'}
@@ -313,7 +332,7 @@ function instForm(id,cid){if(!S.clients.length)return toast('Primero registra un
  modal(`<h1>${id?'Editar':'Nueva'} instalación</h1><div class="f2">
  <div><label>Cliente *</label><select id="f_client">${S.clients.map(c=>`<option value="${c.id}" ${c.id===i.client?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div>
  ${t('date','Fecha','type="date"')}${sel('type','Tipo de trabajo',TYPES)}${sel('status','Estado',STAT)}
- ${t('tech','Técnico que atiende','list="techs"')}${t('cost','Costo (C$)','type="number" min="0"')}${t('cams','Cantidad de cámaras / puntos','type="number" min="0"')}${t('dvr','Modelo o IP del DVR/NVR')}
+ ${t('tech','Técnico que atiende','list="techs"')}<div><label for="f_cost">Costo</label><div style="display:flex;gap:8px"><input id="f_cost" type="number" min="0" step="0.01" value="${esc(i.cost||'')}" placeholder="0.00"><select id="f_currency" aria-label="Moneda del costo" style="width:auto;min-width:125px"><option value="NIO" ${(i.currency||'NIO')==='NIO'?'selected':''}>Córdobas (C$)</option><option value="USD" ${i.currency==='USD'?'selected':''}>Dólares (US$)</option></select></div></div>${t('cams','Cantidad de cámaras / puntos','type="number" min="0"')}${t('dvr','Modelo o IP del DVR/NVR')}
  ${t('dvru','Usuario del equipo')}${t('dvrp','Contraseña del equipo')}${t('wifi','Nombre de la red wifi')}${t('wifip','Contraseña wifi')}</div>
  <datalist id="techs">${S.cfg.techs.split('\n').filter(Boolean).map(x=>`<option value="${esc(x)}">`).join('')}</datalist>
  <div class="f1"><label>Equipos y materiales</label><textarea id="f_equip">${esc(i.equip)}</textarea></div>
@@ -325,12 +344,12 @@ function instForm(id,cid){if(!S.clients.length)return toast('Primero registra un
 function thumbs(){$('#th').innerHTML=tmp.photos.map((p,k)=>`<div><img src="${p}" alt=""><b onclick="tmp.photos.splice(${k},1);thumbs()">×</b></div>`).join('');
  $('#qth').innerHTML=tmp.qr?`<div><img src="${tmp.qr}" alt=""><b onclick="tmp.qr='';thumbs()">×</b></div>`:''}
 async function addPh(inp,k){for(const f of inp.files){const d=await img(f,k==='qr'?900:1000);k==='qr'?tmp.qr=d:tmp.photos.push(d)}inp.value='';thumbs()}
-function saveInst(id){if(!window.ensureWritable())return;const d={client:g('client'),date:g('date')||today(),type:g('type'),status:g('status'),tech:g('tech'),cost:g('cost'),cams:g('cams'),dvr:g('dvr'),dvru:g('dvru'),dvrp:g('dvrp'),wifi:g('wifi'),wifip:g('wifip'),equip:g('equip'),det:g('det'),notes:g('notes'),photos:tmp.photos,qr:tmp.qr};
+function saveInst(id){if(!window.ensureWritable())return;const d={client:g('client'),date:g('date')||today(),type:g('type'),status:g('status'),tech:g('tech'),cost:g('cost'),currency:$('#f_currency').value,cams:g('cams'),dvr:g('dvr'),dvru:g('dvru'),dvrp:g('dvrp'),wifi:g('wifi'),wifip:g('wifip'),equip:g('equip'),det:g('det'),notes:g('notes'),photos:tmp.photos,qr:tmp.qr};
  if(id)Object.assign(S.inst.find(x=>x.id===id),d);else S.inst.push({id:uid(),...d});save();closeM();render();toast('Instalación guardada')}
 const sec=v=>v?`<span class="sec" data-v="${esc(v)}" onclick="if(this.dataset.on){this.textContent='••••••';this.dataset.on=''}else{this.textContent=this.dataset.v;this.dataset.on=1}">••••••</span>`:'—';
 function instView(id){const i=S.inst.find(x=>x.id===id);
  modal(`<h1>${esc(cname(i.client))}</h1><p><span class="badge">${esc(i.type)}</span> <span class="badge">${esc(i.status)}</span></p>
- <dl class="kv"><dt>Fecha</dt><dd>${fmt(i.date)}</dd><dt>Técnico</dt><dd>${esc(i.tech)||'—'}</dd><dt>Costo</dt><dd>${money(i.cost)}</dd><dt>Cámaras / puntos</dt><dd>${esc(i.cams)||'—'}</dd>
+ <dl class="kv"><dt>Fecha</dt><dd>${fmt(i.date)}</dd><dt>Técnico</dt><dd>${esc(i.tech)||'—'}</dd><dt>Costo</dt><dd>${money(i.cost,i.currency||'NIO')}</dd><dt>Cámaras / puntos</dt><dd>${esc(i.cams)||'—'}</dd>
  <dt>DVR/NVR</dt><dd>${esc(i.dvr)||'—'}</dd><dt>Usuario del equipo</dt><dd>${esc(i.dvru)||'—'}</dd><dt>Contraseña del equipo</dt><dd>${sec(i.dvrp)}</dd>
  <dt>Red wifi</dt><dd>${esc(i.wifi)||'—'}</dd><dt>Contraseña wifi</dt><dd>${sec(i.wifip)}</dd><dt>Equipos y materiales</dt><dd>${esc(i.equip)||'—'}</dd><dt>Detalles</dt><dd>${esc(i.det)||'—'}</dd><dt>Notas de mantenimiento</dt><dd>${esc(i.notes)||'—'}</dd></dl>
  ${i.photos.length?`<h2>Fotos del trabajo</h2><div class="ph">${i.photos.map((p,k)=>`<div><img src="${p}" alt="" onclick="showPh('${id}',${k})"></div>`).join('')}</div>`:''}
@@ -399,10 +418,10 @@ function Vrep(){main.innerHTML=`<h1>Reportes</h1><div class="card"><div class="f
  <div class="acts"><button class="btn" onclick="genRep()">Generar reporte</button><button class="btn g" onclick="doPrint($('#repOut').innerHTML)">Imprimir o guardar PDF</button></div></div><div id="repOut" style="margin-top:16px"></div>`}
 function genRep(){const cl=$('#r_c').value,l=filt('',$('#r_t').value,'',$('#r_d').value,$('#r_h').value).filter(i=>!cl||i.client===cl);
  $('#repOut').innerHTML=repHTML(l,{detail:$('#r_det').checked,photos:$('#r_ph').checked,creds:$('#r_cr').checked},cl?'Reporte de instalaciones: '+cname(cl):'Reporte general de instalaciones')}
-function repHTML(l,o,title){const c=S.cfg,sum=l.reduce((a,i)=>a+(+i.cost||0),0),r=(k,v)=>v?`<div><b>${k}:</b> ${esc(v)}</div>`:'';
+function repHTML(l,o,title){const c=S.cfg,r=(k,v)=>v?`<div><b>${k}:</b> ${esc(v)}</div>`:'';
  return `<div class="rp"><div class="rh">${c.logo?`<img src="${c.logo}" alt="">`:''}<div><h2>${esc(c.name)}</h2><small>${esc(c.phone)} ${esc(c.addr)}</small></div></div>
- <h3>${esc(title)}</h3><p>Generado el ${fmt(today())}. Registros: ${l.length}. Total: ${money(sum)}</p>
- <table><tr><th>Fecha</th><th>Cliente</th><th>Tipo</th><th>Técnico</th><th>Estado</th><th>Costo</th></tr>${l.map(i=>`<tr><td>${fmt(i.date)}</td><td>${esc(cname(i.client))}</td><td>${esc(i.type)}</td><td>${esc(i.tech)}</td><td>${esc(i.status)}</td><td>${money(i.cost)}</td></tr>`).join('')||'<tr><td colspan="6">Sin registros para estos filtros.</td></tr>'}</table>
+ <h3>${esc(title)}</h3><p>Generado el ${fmt(today())}. Registros: ${l.length}. Total por moneda: ${moneyTotals(l)}</p>
+ <table><tr><th>Fecha</th><th>Cliente</th><th>Tipo</th><th>Técnico</th><th>Estado</th><th>Costo</th></tr>${l.map(i=>`<tr><td>${fmt(i.date)}</td><td>${esc(cname(i.client))}</td><td>${esc(i.type)}</td><td>${esc(i.tech)}</td><td>${esc(i.status)}</td><td>${money(i.cost,i.currency||'NIO')}</td></tr>`).join('')||'<tr><td colspan="6">Sin registros para estos filtros.</td></tr>'}</table>
  ${o.detail?l.map(i=>`<div class="blk"><b>${esc(cname(i.client))}</b> · ${esc(i.type)} · ${fmt(i.date)}${r('Cámaras / puntos',i.cams)}${r('DVR/NVR',i.dvr)}${r('Red wifi',i.wifi)}${r('Equipos y materiales',i.equip)}${r('Detalles',i.det)}${r('Notas de mantenimiento',i.notes)}
  ${o.creds?r('Usuario del equipo',i.dvru)+r('Contraseña del equipo',i.dvrp)+r('Contraseña wifi',i.wifip):''}
  ${o.photos?`<div class="ph">${i.photos.map(p=>`<img src="${p}" alt="">`).join('')}${i.qr?`<img src="${i.qr}" alt="">`:''}</div>`:''}</div>`).join(''):''}</div>`}
