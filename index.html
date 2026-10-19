@@ -1,11 +1,15 @@
-EStá perfectro<!doctype html>
+<!doctype html>
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Gestión de instalaciones</title>
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#eef1f6;--card:#fff;--tx:#12203a;--mut:#667592;--bd:#dde3ee;--pri:#0b5fd9;--pri2:#e6effc;--side:#0e1a30;--dan:#c62828;color-scheme:light}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a111f;--card:#131c2e;--tx:#e8edf7;--mut:#8f9bb5;--bd:#25314a;--pri:#5b9bff;--pri2:#16264a;--side:#060b16;--dan:#f87171;color-scheme:dark}}
+@media (prefers-color-scheme:dark){:root:not([data-theme]),:root[data-theme="auto"]{--bg:#0a111f;--card:#131c2e;--tx:#e8edf7;--mut:#8f9bb5;--bd:#25314a;--pri:#5b9bff;--pri2:#16264a;--side:#060b16;--dan:#f87171;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#0a111f;--card:#131c2e;--tx:#e8edf7;--mut:#8f9bb5;--bd:#25314a;--pri:#5b9bff;--pri2:#16264a;--side:#060b16;--dan:#f87171;color-scheme:dark}
+:root[data-theme="ocean"]{--bg:#eaf4f7;--card:#fff;--tx:#123040;--mut:#547281;--bd:#c9e0e7;--pri:#087f9a;--pri2:#d9f0f4;--side:#123541;--dan:#c62828;color-scheme:light}
+:root[data-theme="forest"]{--bg:#edf3ed;--card:#fff;--tx:#203526;--mut:#657a69;--bd:#d3e0d4;--pri:#347a45;--pri2:#e0efe2;--side:#1d3826;--dan:#c62828;color-scheme:light}
+:root[data-theme="sunset"]{--bg:#faf0e9;--card:#fff;--tx:#3b2923;--mut:#877067;--bd:#ead7cb;--pri:#c45b38;--pri2:#f8e4d8;--side:#4b2a23;--dan:#b42332;color-scheme:light}
+:root[data-theme="lavender"]{--bg:#f2eff8;--card:#fff;--tx:#302744;--mut:#766c89;--bd:#ddd6eb;--pri:#7053b5;--pri2:#eae3f7;--side:#302445;--dan:#c62828;color-scheme:light}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
 .app{display:flex;min-height:100vh}
@@ -29,6 +33,7 @@ body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 "Segoe UI",syst
 .profile-popover h2{margin:0 0 12px;font-size:15px}
 .profile-popover label{margin:10px 0 4px;color:var(--mut);font-size:12px}
 .profile-popover input{padding:8px 9px;font-size:13px}
+.profile-popover select{padding:8px 9px;font-size:13px}
 .profile-popover .btn{padding:7px 10px;font-size:12px}
 .profile-popover .profile-file{display:block;margin-top:10px}
 .profile-popover .profile-file input{font-size:11px}
@@ -243,6 +248,12 @@ const cname=id=>(S.clients.find(c=>c.id===id)||{}).name||'(cliente eliminado)';
 const g=id=>$('#f_'+id).value.trim();
 const confirmBtn=(label,fn)=>`<button class="btn d" onclick="if(!this.dataset.c){this.dataset.c=1;this.textContent='¿Confirmar eliminación?';return}${fn}">${label}</button>`;
 /* Navegación */
+function applyTheme(){
+ const preference=window.profileData?.theme;
+ const selected=preference&&preference!=='auto'?preference:S.cfg.theme||'auto';
+ const theme=['light','dark','ocean','forest','sunset','lavender'].includes(selected)?selected:'auto';
+ if(theme==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=theme;
+}
 function brand(){
  const c=S.cfg,p=window.profileData||{},avatar=p.avatar?`<img src="${esc(p.avatar)}" alt="">`:'<span aria-hidden="true">👤</span>';
  const companyLogo=$('#loginCompanyLogo'),companyName=$('#loginCompanyName');
@@ -259,12 +270,24 @@ function brand(){
     <div class="profile-actions"><button class="btn" type="button" onclick="saveProfileName()">Guardar nombre</button></div>
     <label class="profile-file" for="profilePhoto">Fotografía</label><input id="profilePhoto" type="file" accept="image/jpeg,image/png,image/webp" onchange="uploadProfilePhoto(this)">
    </div>
-   <p class="profile-message" id="profileMessage" role="status" aria-live="polite">${esc(p.email||'')}</p>
+    <div class="profile-section">
+     <label for="profileTheme">Tema de colores</label>
+     <select id="profileTheme" onchange="saveProfileTheme(this)">
+      <option value="auto" ${(!p.theme||p.theme==='auto')?'selected':''}>Automático (configuración)</option>
+      <option value="light" ${p.theme==='light'?'selected':''}>Claro</option>
+      <option value="dark" ${p.theme==='dark'?'selected':''}>Oscuro</option>
+      <option value="ocean" ${p.theme==='ocean'?'selected':''}>Océano</option>
+      <option value="forest" ${p.theme==='forest'?'selected':''}>Bosque</option>
+      <option value="sunset" ${p.theme==='sunset'?'selected':''}>Atardecer</option>
+      <option value="lavender" ${p.theme==='lavender'?'selected':''}>Lavanda</option>
+     </select>
+    </div>
+    <p class="profile-message" id="profileMessage" role="status" aria-live="polite">${esc(p.email||'')}</p>
    <div class="profile-actions"><button class="btn g" type="button" onclick="openProfilePassword()">Cambiar contraseña</button></div>
    <div class="profile-actions"><button class="btn d" type="button" onclick="sbLogout()">Cerrar sesión</button></div>
   </div>`;
- document.title=c.name+' – Gestión de instalaciones';
- if(c.theme==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=c.theme}
+  document.title=c.name+' – Gestión de instalaciones';
+  applyTheme()}
 function nav(){
  const items=[['dash','Panel','🏠'],['clients','Clientes','👥'],['inst','Instalaciones','🛠'],['maint','Mantenimiento','🗓️'],['rep','Reportes','📄'],['cfg','Configuración','⚙']];
  $('#nav').innerHTML=items.map(n=>`<button class="${view===n[0]?'on':''}" ${view===n[0]?'aria-current="page"':''} onclick="go('${n[0]}')"><span>${n[2]}</span>${n[1]}</button>`).join('');
@@ -694,7 +717,8 @@ async function refreshProfile(user){
  window.profileData={
   name:metadata.display_name||metadata.full_name||metadata.name||user.email?.split('@')[0]||'Usuario',
   email:user.email||'',
-  avatar
+  avatar,
+  theme:['auto','light','dark','ocean','forest','sunset','lavender'].includes(metadata.theme_preference)?metadata.theme_preference:'auto'
  };
  window.brand();
 }
@@ -740,6 +764,29 @@ window.saveProfileName=async()=>{
   if(error)throw error;
   currentUser=data.user;await refreshProfile(data.user);profileMessage('Nombre actualizado.');toast('Nombre actualizado');
  }catch(e){profileMessage(e.message||'No se pudo actualizar el nombre.',true);}
+};
+window.saveProfileTheme=async select=>{
+ const theme=select.value;
+ if(!['auto','light','dark','ocean','forest','sunset','lavender'].includes(theme)){
+  profileMessage('Elige un tema disponible.',true);return;
+ }
+ const previousTheme=window.profileData?.theme||'auto';
+ select.disabled=true;
+ window.profileData={...window.profileData,theme};
+ applyTheme();
+ try{
+  const {data,error}=await supabase.auth.updateUser({data:{...currentUser.user_metadata,theme_preference:theme}});
+  if(error)throw error;
+  currentUser=data.user;
+  select.disabled=false;
+  profileMessage('Tema guardado en tu cuenta.');
+ }catch(e){
+  console.error(e);
+  window.profileData={...window.profileData,theme:previousTheme};
+  applyTheme();
+  select.disabled=false;
+  profileMessage(e.message||'No se pudo guardar el tema.',true);
+ }
 };
 window.changeProfilePassword=async()=>{
  try{
